@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<div class="row">
+
+    <div class="col-12">
+        <h2 class="mb-4">
+            Bienvenido {{ current_user.usuario }}
+        </h2>
+    </div>
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-4 mb-3">
+        <div class="card shadow">
+            <div class="card-body text-center">
+
+                <h5>Total de Visitantes</h5>
+
+                <h1 class="mt-3">
+                    {{ visitantes }}
+                </h1>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card shadow">
+            <div class="card-body text-center">
+
+                <h5>Total de Incidentes</h5>
+
+                <h1 class="mt-3">
+                    {{ incidentes }}
+                </h1>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card shadow">
+            <div class="card-body text-center">
+
+                <h5>Usuarios</h5>
+
+                <h1 class="mt-3">
+                    {{ usuarios }}
+                </h1>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+    <div class="col-md-3 mb-3">
+
+        <a
+            href="{{ url_for('visitantes') }}"
+            class="btn btn-success w-100"
+        >
+            Registro de Visitantes
+        </a>
+
+    </div>
+
+    <div class="col-md-3 mb-3">
+
+        <a
+    href="{{ url_for('incidentes') }}"
+    class="btn btn-primary w-100"
+>
+    Incidentes
+</a>
+
+    </div>
+
+    <div class="col-md-3 mb-3">
+
+        <a
+            href="{{ url_for('cambiar_password') }}"
+            class="btn btn-warning w-100"
+        >
+            Cambiar Contraseña
+        </a>
+
+    </div>
+
+    <div class="col-md-3 mb-3">
+
+        <a
+            href="{{ url_for('logout') }}"
+            class="btn btn-danger w-100"
+        >
+            Cerrar Sesión
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
