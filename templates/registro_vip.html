@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container mt-4">
+
+```
+<h2 class="mb-4">
+    Registro VIP
+</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<form method="POST">
+
+    <div class="mb-3">
+        <label class="form-label">
+            VIP
+        </label>
+
+        <select
+            name="vip"
+            class="form-select"
+            required
+        >
+            <option value="">
+                Seleccione
+            </option>
+            <option value="URIM">
+                URIM
+            </option>
+            <option value="LEVI">
+                LEVI
+            </option>
+            <option value="CORA">
+                CORA
+            </option>
+            <option value="JUDA">
+                JUDA
+            </option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Movimiento
+        </label>
+
+        <select
+            name="movimiento"
+            id="movimiento"
+            class="form-select"
+            onchange="cambiarEtiqueta()"
+            required
+        >
+            <option value="">
+                Seleccione
+            </option>
+            <option value="Entrada">
+                Entrada
+            </option>
+            <option value="Salida">
+                Salida
+            </option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label
+            id="lbl_puesto"
+            class="form-label"
+        >
+            Puesto
+        </label>
+
+        <select
+            name="puesto"
+            class="form-select"
+            required
+        >
+            <option value="">
+                Seleccione
+            </option>
+            <option value="PUESTO 1">
+                PUESTO 1
+            </option>
+            <option value="PUESTO 2">
+                PUESTO 2
+            </option>
+            <option value="PUESTO 3">
+                PUESTO 3
+            </option>
+        </select>
+    </div>
+
+    <button
+        type="submit"
+        class="btn btn-primary"
+    >
+        Guardar Registro
+    </button>
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-secondary"
+    >
+        Regresar al Dashboard
+    </a>
+
+</form>
+```
+
+</div>
+
+<script>
+function cambiarEtiqueta() {
+    const movimiento =
+        document.getElementById(
+            "movimiento"
+        ).value;
+
+    const etiqueta =
+        document.getElementById(
+            "lbl_puesto"
+        );
+
+    if (movimiento === "Salida") {
+        etiqueta.innerText =
+            "¿De qué puesto salió?";
+    }
+    else if (
+        movimiento === "Entrada"
+    ) {
+        etiqueta.innerText =
+            "¿A qué puesto entró?";
+    }
+    else {
+        etiqueta.innerText =
+            "Puesto";
+    }
+}
+</script>
+
+{% endblock %}

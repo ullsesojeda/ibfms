@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Nuevo Usuario</h2>
+
+<form method="POST">
+
+    <div class="mb-3">
+        <label>Usuario</label>
+        <input
+            type="text"
+            name="usuario"
+            class="form-control"
+            required
+        >
+    </div>
+
+    <div class="mb-3">
+        <label>Contraseña</label>
+        <input
+            type="password"
+            name="password"
+            class="form-control"
+            required
+        >
+    </div>
+
+    <div class="mb-3">
+        <label>Rol</label>
+
+        <select
+            name="rol"
+            class="form-select"
+        >
+            <option value="guardia">
+                Guardia
+            </option>
+
+            <option value="admin">
+                Administrador
+            </option>
+        </select>
+    </div>
+
+    <button
+        class="btn btn-success"
+    >
+        Guardar
+    </button>
+
+    <a
+        href="{{ url_for('usuarios') }}"
+        class="btn btn-secondary"
+    >
+        Cancelar
+    </a>
+
+</form>
+
+{% endblock %}

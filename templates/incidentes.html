@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<h2>Registro de Incidentes</h2>
+
+<div class="card shadow mb-4">
+<div class="card-body">
+
+<form method="POST">
+
+<div class="mb-3">
+<label>Tipo de incidente</label>
+<input
+    type="text"
+    name="tipo"
+    class="form-control"
+    required
+>
+</div>
+
+<div class="mb-3">
+<label>Descripción</label>
+<textarea
+    name="descripcion"
+    class="form-control"
+    rows="5"
+    required
+></textarea>
+</div>
+
+<button class="btn btn-primary">
+Guardar incidente
+</button>
+
+</form>
+
+</div>
+
+<div class="mb-3">
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-secondary"
+    >
+        Dashboard
+    </a>
+
+    <a
+        href="{{ url_for('visitantes') }}"
+        class="btn btn-success"
+    >
+        Visitantes
+    </a>
+
+</div>
+
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-striped">
+
+<thead>
+<tr>
+    <th>Fecha</th>
+    <th>Tipo</th>
+    <th>Descripción</th>
+    <th>Guardia</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for i in incidentes %}
+
+<tr>
+    <td>{{ i.fecha }}</td>
+    <td>{{ i.tipo }}</td>
+    <td>{{ i.descripcion }}</td>
+    <td>{{ i.guardia }}</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

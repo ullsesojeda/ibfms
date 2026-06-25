@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<h2>Registro de Visitantes</h2>
+
+<div class="card shadow mb-4">
+<div class="card-body">
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-4 mb-3">
+<label>Nombre</label>
+<input type="text" name="nombre" class="form-control" required>
+</div>
+
+<div class="col-md-4 mb-3">
+<label>Identificación</label>
+<input type="text" name="identificacion" class="form-control">
+</div>
+
+<div class="col-md-4 mb-3">
+<label>Placas</label>
+<input type="text" name="placas" class="form-control">
+</div>
+
+<div class="col-md-4 mb-3">
+<label>Vehículo</label>
+<input type="text" name="vehiculo" class="form-control">
+</div>
+
+<div class="col-md-4 mb-3">
+<label>Visita a</label>
+<input type="text" name="visita" class="form-control">
+</div>
+
+<div class="col-md-4 mb-3">
+<label>Motivo</label>
+<input type="text" name="motivo" class="form-control">
+</div>
+
+<div class="mb-3">
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-secondary"
+    >
+        Dashboard
+    </a>
+
+    <a
+        href="{{ url_for('incidentes') }}"
+        class="btn btn-primary"
+    >
+        Incidentes
+    </a>
+
+</div>
+
+</div>
+
+<button class="btn btn-success">
+Guardar visitante
+</button>
+
+</form>
+
+</div>
+</div>
+
+<div class="mb-3">
+<a
+    href="{{ url_for('exportar_visitantes') }}"
+    class="btn btn-primary"
+>
+Exportar a Excel
+</a>
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-striped">
+
+<thead>
+
+<tr>
+<th>Fecha</th>
+<th>Nombre</th>
+<th>ID</th>
+<th>Placas</th>
+<th>Vehículo</th>
+<th>Visita</th>
+<th>Motivo</th>
+<th>Entrada</th>
+<th>Salida</th>
+<th>Guardia</th>
+<th>Acción</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for v in visitantes %}
+
+<tr>
+
+<td>{{ v.fecha }}</td>
+<td>{{ v.nombre }}</td>
+<td>{{ v.identificacion }}</td>
+<td>{{ v.placas }}</td>
+<td>{{ v.vehiculo }}</td>
+<td>{{ v.visita }}</td>
+<td>{{ v.motivo }}</td>
+<td>{{ v.entrada }}</td>
+<td>{{ v.salida or '' }}</td>
+<td>{{ v.guardia }}</td>
+
+<td>
+
+{% if not v.salida %}
+<a
+    href="{{ url_for('registrar_salida', id=v.id) }}"
+    class="btn btn-warning btn-sm"
+>
+Salida
+</a>
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Historial de Registro VIP</h2>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>VIP</th>
+            <th>Movimiento</th>
+            <th>Puesto</th>
+            <th>Guardia</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for r in registros %}
+        <tr>
+            <td>{{ r.fecha }}</td>
+            <td>{{ r.vip }}</td>
+            <td>{{ r.movimiento }}</td>
+            <td>{{ r.puesto }}</td>
+            <td>{{ r.guardia }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a
+    href="{{ url_for('dashboard') }}"
+    class="btn btn-secondary"
+>
+    Regresar al Dashboard
+</a>
+
+{% endblock %}

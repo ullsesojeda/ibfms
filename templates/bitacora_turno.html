@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<h3>Bitácora de Turno</h3>
+
+<form method="POST">
+
+    <select
+        name="turno"
+        class="form-control mb-2"
+    >
+        <option>Matutino</option>
+        <option>Vespertino</option>
+        <option>Nocturno</option>
+    </select>
+
+    <input
+        type="text"
+        name="asunto"
+        class="form-control mb-2"
+        placeholder="Asunto"
+        required
+    >
+
+    <textarea
+        name="descripcion"
+        class="form-control mb-3"
+        rows="4"
+        placeholder="Descripción"
+        required
+    ></textarea>
+
+    <button
+        class="btn btn-primary"
+    >
+        Guardar
+    </button>
+
+</form>
+
+<hr>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+    ← Regresar al Dashboard
+</a>
+<!-- AQUÍ PEGA LA TABLA -->
+
+<table class="table table-striped">
+
+<thead>
+<tr>
+    <th>Fecha</th>
+    <th>Turno</th>
+    <th>Asunto</th>
+    <th>Descripción</th>
+    <th>Guardia</th>
+    <th>Estado</th>
+    <th>Acción</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for b in bitacora %}
+<tr>
+    <td>{{ b.fecha }}</td>
+    <td>{{ b.turno }}</td>
+    <td>{{ b.asunto }}</td>
+    <td>{{ b.descripcion }}</td>
+    <td>{{ b.guardia }}</td>
+
+<td style="min-width:200px;"></tdstyle>
+    {% if b.recibido %}
+        Recibido por {{ b.recibido_por }}
+    {% else %}
+        Pendiente
+    {% endif %}
+</td>
+
+<td>
+    {% if not b.recibido %}
+        <a
+            href="{{ url_for('recibir_bitacora', id=b.id) }}"
+            class="btn btn-success btn-sm"
+        >
+            Recibido
+        </a>
+    {% endif %}
+</td>
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+
+{% endblock %}
