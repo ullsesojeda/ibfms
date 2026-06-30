@@ -28,7 +28,8 @@ from models import (
     Incidente,
     Actividad,
     BitacoraTurno,
-    RegistroVIP
+    RegistroVIP,
+    Empleado
 )
 
 from datetime import datetime
@@ -564,6 +565,77 @@ def actividades():
             "actividades.html",
             actividades=datos
         )
+
+@app.route(
+    "/empleados",
+    methods=["GET", "POST"]
+)
+@login_required
+def empleados():
+
+    if request.method == "POST":
+
+        nuevo = Empleado(
+            fecha=datetime.now().strftime(
+                "%d/%m/%Y"
+            ),
+            chofer=request.form["chofer"],
+            vehiculo=request.form["vehiculo"],
+            entrada=datetime.now().strftime(
+                "%H:%M:%S"
+            ),
+            guardia=current_user.usuario
+        )
+
+        db.session.add(nuevo)
+        db.session.commit()
+
+        flash(
+            "Entrada registrada.",
+            "success"
+        )
+
+        return redirect(
+            url_for("empleados")
+        )
+
+    datos = (
+        Empleado.query
+        .order_by(
+            Empleado.id.desc()
+        )
+        .all()
+    )
+
+    return render_template(
+        "empleados.html",
+        empleados=datos
+    )
+
+@app.route(
+    "/registrar_salida_empleado/<int:id>"
+)
+@login_required
+def registrar_salida_empleado(id):
+
+    empleado = Empleado.query.get_or_404(id)
+
+    empleado.salida = (
+        datetime.now().strftime(
+            "%H:%M:%S"
+        )
+    )
+
+    db.session.commit()
+
+    flash(
+        "Salida registrada.",
+        "success"
+    )
+
+    return redirect(
+        url_for("empleados")
+    )
 
 @app.route(
     "/registro_vip",

@@ -38,6 +38,7 @@ class Incidente(db.Model):
     descripcion = db.Column(db.Text)
     guardia = db.Column(db.String(50))
 
+
 class Actividad(db.Model):
     __tablename__ = "actividades"
 
@@ -62,6 +63,7 @@ class Actividad(db.Model):
         db.String(50)
     )
 
+
 class BitacoraTurno(db.Model):
     __tablename__ = "bitacora_turno"
 
@@ -84,6 +86,7 @@ class BitacoraTurno(db.Model):
     recibido_por = db.Column(
         db.String(50)
     )
+
 
 class RegistroVIP(db.Model):
     __tablename__ = "registro_vip"
@@ -116,4 +119,43 @@ class RegistroVIP(db.Model):
     guardia = db.Column(
         db.String(100),
         nullable=False
+    )
+
+
+class Empleado(db.Model):
+    __tablename__ = "empleados"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    fecha = db.Column(
+        db.String(20)
+    )
+
+    chofer = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    vehiculo = db.Column(
+        db.String(100),
+        nullable=False
+    )
+    puesto = db.Column(
+    db.String(20),
+    nullable=False
+    )
+
+    entrada = db.Column(
+        db.String(20)
+    )
+
+    salida = db.Column(
+        db.String(20)
+    )
+
+    guardia = db.Column(
+        db.String(50)
     )

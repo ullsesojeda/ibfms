@@ -2,140 +2,161 @@
 
 {% block contenido %}
 
-<div class="row">
+<div class="container">
 
-    <div class="col-12">
-        <h2 class="mb-4">
-            Bienvenido {{ current_user.usuario }}
-        </h2>
+    <div class="row mb-4">
+
+        <div class="col-12">
+            <h2>
+                Bienvenido {{ current_user.usuario }}
+            </h2>
+        </div>
+
     </div>
 
-</div>
+    <div class="row text-center">
 
-<div class="row">
+        <div class="col-md-4 mb-3">
 
-    <div class="col-md-4 mb-3">
-        <div class="card shadow">
-            <div class="card-body text-center">
+            <div class="card shadow">
 
-                <h5>Total de Visitantes</h5>
+                <div class="card-body">
 
-                <h1 class="mt-3">
-                    {{ visitantes }}
-                </h1>
+                    <h5>Total de Visitantes</h5>
+
+                    <h1>
+                        {{ visitantes }}
+                    </h1>
+
+                </div>
 
             </div>
+
         </div>
-    </div>
 
-    <div class="col-md-4 mb-3">
-        <div class="card shadow">
-            <div class="card-body text-center">
+        <div class="col-md-4 mb-3">
 
-                <h5>Total de Incidentes</h5>
+            <div class="card shadow">
 
-                <h1 class="mt-3">
-                    {{ incidentes }}
-                </h1>
+                <div class="card-body">
+
+                    <h5>Total de Incidentes</h5>
+
+                    <h1>
+                        {{ incidentes }}
+                    </h1>
+
+                </div>
 
             </div>
+
         </div>
-    </div>
 
-    <div class="col-md-4 mb-3">
-        <div class="card shadow">
-            <div class="card-body text-center">
+        <div class="col-md-4 mb-3">
 
-                <h5>Usuarios</h5>
+            <div class="card shadow">
 
-                <h1 class="mt-3">
-                    {{ usuarios }}
-                </h1>
+                <div class="card-body">
+
+                    <h5>Usuarios</h5>
+
+                    <h1>
+                        {{ usuarios }}
+                    </h1>
+
+                </div>
 
             </div>
+
         </div>
-    </div>
-
-</div>
-
-<hr>
-
-<div class="row">
-
-    <div class="col-md-3 mb-3">
-
-        <a
-            href="{{ url_for('visitantes') }}"
-            class="btn btn-success w-100"
-        >
-            Registro de Visitantes
-        </a>
 
     </div>
 
-    <div class="col-md-3 mb-3">
+    <hr>
 
-        <a
-    href="{{ url_for('incidentes') }}"
-    class="btn btn-primary w-100"
->
-    Incidentes
-</a>
+    <div class="row">
 
-    </div>
+        <div class="col-md-6">
 
-    <div class="col-md-3 mb-3">
+            <a
+                href="{{ url_for('visitantes') }}"
+                class="btn btn-success w-100 mb-2"
+            >
+                🧍 Registro de Visitantes
+            </a>
 
-        <a href="{{ url_for('actividades') }}"
-    class="btn btn-info w-100">
-    Actividades
-    </a>
-   
-    <a href="{{ url_for('registro_vip') }}"
-   class="btn btn-warning">
-    Registro VIP
-</a>
-    {% if current_user.rol == 'admin' %}
-<a
-    href="{{ url_for('historial_vip') }}"
-    class="btn btn-dark"
->
-    Historial VIP
-</a>
-{% endif %}
-<a
-    href="{{ url_for('bitacora_turno') }}"
-    class="btn btn-secondary w-100"
->
-    Bitácora de Turno
-</a>
+            <a
+                href="{{ url_for('empleados') }}"
+                class="btn btn-primary w-100 mb-2"
+            >
+                🚛 Registro de Empleados
+            </a>
 
-{% if current_user.rol == 'admin' %}
-<a
-    href="{{ url_for('usuarios') }}"
-    class="btn btn-dark"
->
-    Administración de Usuarios
-</a>
-{% endif %}
+            <a
+                href="{{ url_for('registro_vip') }}"
+                class="btn btn-warning w-100 mb-2"
+            >
+                ⭐ Registro VIP
+            </a>
 
-        <a
-            href="{{ url_for('cambiar_password') }}"
-            class="btn btn-warning w-100"
-        >
-            Cambiar Contraseña
-        </a>
+            <a
+                href="{{ url_for('bitacora_turno') }}"
+                class="btn btn-secondary w-100 mb-2"
+            >
+                📒 Bitácora de Turno
+            </a>
 
-    </div>
+            <a
+                href="{{ url_for('actividades') }}"
+                class="btn btn-info w-100 mb-2"
+            >
+                📋 Actividades
+            </a>
 
-    <div class="col-md-3 mb-3">
+            <a
+                href="{{ url_for('incidentes') }}"
+                class="btn btn-danger w-100 mb-2"
+            >
+                ⚠️ Incidentes
+            </a>
 
-        <a
-            href="{{ url_for('logout') }}"
-            class="btn btn-danger w-100"
-        >
-            Cerrar Sesión
-        </a>
+        </div>
+
+        <div class="col-md-6">
+
+            {% if current_user.rol == "admin" %}
+
+            <a
+                href="{{ url_for('historial_vip') }}"
+                class="btn btn-dark w-100 mb-2"
+            >
+                ⭐ Historial VIP
+            </a>
+
+            <a
+                href="{{ url_for('usuarios') }}"
+                class="btn btn-dark w-100 mb-2"
+            >
+                👥 Administración de Usuarios
+            </a>
+
+            {% endif %}
+
+            <a
+                href="{{ url_for('cambiar_password') }}"
+                class="btn btn-warning w-100 mb-2"
+            >
+                🔑 Cambiar Contraseña
+            </a>
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="btn btn-danger w-100"
+            >
+                🚪 Cerrar Sesión
+            </a>
+
+        </div>
 
     </div>
 

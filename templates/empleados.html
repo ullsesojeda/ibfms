@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2 class="mb-4">Registro de Empleados</h2>
+
+<form method="POST">
+
+    <div class="row">
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label">
+                Chofer
+            </label>
+
+            <select
+                name="chofer"
+                class="form-select"
+                required
+            >
+                <option value="">Seleccione...</option>
+                <option>Jonathan Venegas</option>
+                <option>Salvador Soria</option>
+                <option>Antonio Rodriguez</option>
+                <option>Arturo Cruz</option>
+                <option>Eliut Manrique</option>
+                <option>Marco Jauregui</option>
+                <option>Marco Jauregui Jr</option>
+                <option>Israel Tafoya</option>
+                <option>Agel Carmona</option>
+                <option>Fernando Secua</option>
+                <option>Elias Panti</option>
+                <option>Jordan Mendoza</option>
+                <option>Jonathan Perez</option>
+                <option>Francisco Ramos</option>
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label class="form-label">
+                Vehículo
+            </label>
+
+            <select
+                name="vehiculo"
+                class="form-select"
+                required
+            >
+                <option value="">Seleccione...</option>
+                <option>Expedition</option>
+                <option>Transport</option>
+                <option>Sanavi</option>
+                <option>Amarillo</option>
+                <option>Super Duty</option>
+                <option>Star Craft</option>
+                <option>Aveo</option>
+                <option>Yukon</option>
+                <option>Pick Up</option>
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label class="form-label">
+                Puesto
+            </label>
+
+            <select
+                name="puesto"
+                class="form-select"
+                required
+            >
+                <option value="">Seleccione...</option>
+                <option>Puesto 1</option>
+                <option>Puesto 2</option>
+                <option>Puesto 3</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 mb-3 d-grid">
+
+            <label class="form-label">&nbsp;</label>
+
+            <button
+                type="submit"
+                class="btn btn-success"
+            >
+                Registrar
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
+
+<hr>
+
+<table class="table table-striped table-bordered table-hover">
+
+    <thead class="table-dark">
+
+        <tr>
+            <th>Fecha</th>
+            <th>Chofer</th>
+            <th>Vehículo</th>
+            <th>Puesto</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Guardia</th>
+            <th>Acción</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for e in empleados %}
+
+        <tr>
+
+            <td>{{ e.fecha }}</td>
+            <td>{{ e.chofer }}</td>
+            <td>{{ e.vehiculo }}</td>
+            <td>{{ e.puesto }}</td>
+            <td>{{ e.entrada }}</td>
+            <td>{{ e.salida if e.salida else "" }}</td>
+            <td>{{ e.guardia }}</td>
+
+            <td>
+
+            {% if not e.salida %}
+
+                <a
+                    href="{{ url_for('registrar_salida_empleado', id=e.id) }}"
+                    class="btn btn-danger btn-sm"
+                >
+                    Registrar Salida
+                </a>
+
+            {% else %}
+
+                <span class="badge bg-success">
+                    Salida Registrada
+                </span>
+
+            {% endif %}
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+<a
+    href="{{ url_for('dashboard') }}"
+    class="btn btn-secondary"
+>
+    Regresar al Dashboard
+</a>
+
+{% endblock %}
