@@ -581,6 +581,7 @@ def empleados():
             ),
             chofer=request.form["chofer"],
             vehiculo=request.form["vehiculo"],
+            puesto=request.form["puesto"],
             entrada=datetime.now().strftime(
                 "%H:%M:%S"
             ),
