@@ -1,0 +1,181 @@
+<style>
+
+        body{
+            margin:0;
+            background:#f4f6f9;
+            overflow-x:hidden;
+        }
+
+        .sidebar{
+
+            position:fixed;
+
+            top:0;
+
+            left:0;
+
+            width:250px;
+
+            height:100vh;
+
+            background:#1f2937;
+
+            color:white;
+
+            padding-top:20px;
+
+        }
+
+        .sidebar h3{
+
+            text-align:center;
+
+            margin-bottom:30px;
+
+            font-weight:bold;
+
+        }
+
+        .sidebar a{
+
+            display:block;
+
+            color:white;
+
+            text-decoration:none;
+
+            padding:12px 20px;
+
+            transition:.2s;
+
+        }
+
+        .sidebar a:hover{
+
+            background:#374151;
+
+            color:white;
+
+        }
+
+        .sidebar a.active{
+
+    background:#0d6efd;
+
+    border-left:5px solid #ffffff;
+
+    font-weight:bold;
+
+}
+
+        .content{
+
+            margin-left:250px;
+
+            min-height:100vh;
+
+        }
+
+        .topbar{
+
+            background:white;
+
+            padding:15px 25px;
+
+            box-shadow:0 2px 8px rgba(0,0,0,.15);
+
+        }
+
+        .page{
+
+            padding:25px;
+
+        }
+
+.dark-mode{
+
+    background:#121212 !important;
+
+    color:white;
+
+}
+
+.dark-mode .content{
+
+    background:#121212;
+
+}
+
+.dark-mode .page{
+
+    background:#121212;
+
+}
+
+.dark-mode .topbar{
+
+    background:#1f1f1f;
+
+    color:white;
+
+}
+
+.dark-mode .sidebar{
+
+    background:linear-gradient(
+        180deg,
+        #111827,
+        #030712
+    );
+
+}
+
+.dark-mode .card{
+
+    background:#1e1e1e;
+
+    color:white;
+
+}
+
+.dark-mode table{
+
+    color:white;
+
+}
+
+.dark-mode .table{
+
+    --bs-table-bg:#1e1e1e;
+
+    --bs-table-color:white;
+
+}
+
+.dark-mode .form-control,
+.dark-mode .form-select{
+
+    background:#2b2b2b;
+
+    color:white;
+
+    border-color:#555;
+
+}
+
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus{
+
+    background:#2b2b2b;
+
+    color:white;
+
+}
+
+.dark-mode .text-muted{
+
+    color:#bdbdbd !important;
+
+}
+
+    </style>

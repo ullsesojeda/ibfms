@@ -726,5 +726,24 @@ def recibir_bitacora(id):
         url_for("bitacora_turno")
     )
 
+@app.route("/administracion")
+@login_required
+def administracion():
+
+    if current_user.rol != "admin":
+
+        flash(
+            "No tiene permisos.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+    return render_template(
+        "administracion.html"
+    )
+
 if __name__ == "__main__":
     app.run(debug=True)   
