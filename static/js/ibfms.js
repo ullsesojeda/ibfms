@@ -59,3 +59,28 @@ if(interruptor){
     });
 
 }
+
+// --------------------
+// Menú responsive
+// --------------------
+
+const btnMenu =
+document.getElementById("btnMenu");
+
+const sidebar =
+document.querySelector(".sidebar");
+
+if(btnMenu){
+
+    btnMenu.addEventListener(
+        "click",
+        function(){
+
+            sidebar.classList.toggle(
+                "show"
+            );
+
+        }
+    );
+
+}
