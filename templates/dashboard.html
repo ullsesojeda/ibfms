@@ -1,30 +1,36 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block contenido %}
 
-<div class="container">
+<div class="container-fluid">
 
-    <div class="row mb-4">
+    <div class="mb-4">
 
-        <div class="col-12">
-            <h2>
-                Bienvenido {{ current_user.usuario }}
-            </h2>
-        </div>
+        <h2 class="fw-bold">
+            🛡️ Centro de Control IBFMS
+        </h2>
+
+        <p class="text-muted">
+            Bienvenido {{ current_user.usuario }}
+        </p>
 
     </div>
 
-    <div class="row text-center">
+    <!-- PRIMERA FILA -->
 
-        <div class="col-md-4 mb-3">
+    <div class="row g-3">
 
-            <div class="card shadow">
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
 
                 <div class="card-body">
 
-                    <h5>Total de Visitantes</h5>
+                    <h6 class="text-muted">
+                        👥 Visitantes Registrados
+                    </h6>
 
-                    <h1>
+                    <h1 class="display-5">
                         {{ visitantes }}
                     </h1>
 
@@ -34,16 +40,18 @@
 
         </div>
 
-        <div class="col-md-4 mb-3">
+        <div class="col-md-4">
 
-            <div class="card shadow">
+            <div class="card shadow text-center">
 
                 <div class="card-body">
 
-                    <h5>Total de Incidentes</h5>
+                    <h6 class="text-muted">
+                        🟢 Visitantes Dentro
+                    </h6>
 
-                    <h1>
-                        {{ incidentes }}
+                    <h1 class="display-5 text-success">
+                        {{ visitantes_dentro }}
                     </h1>
 
                 </div>
@@ -52,15 +60,109 @@
 
         </div>
 
-        <div class="col-md-4 mb-3">
+        <div class="col-md-4">
 
-            <div class="card shadow">
+            <div class="card shadow text-center">
 
                 <div class="card-body">
 
-                    <h5>Usuarios</h5>
+                    <h6 class="text-muted">
+                        🚛 Empleados Dentro
+                    </h6>
 
-                    <h1>
+                    <h1 class="display-5 text-primary">
+                        {{ empleados_dentro }}
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SEGUNDA FILA -->
+
+    <div class="row g-3 mt-1">
+
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        ⭐ Movimientos VIP Hoy
+                    </h6>
+
+                    <h1 class="display-5 text-warning">
+                        {{ vip_hoy }}
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        ⚠ Incidentes Hoy
+                    </h6>
+
+                    <h1 class="display-5 text-danger">
+                        {{ incidentes_hoy }}
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        📋 Actividades Hoy
+                    </h6>
+
+                    <h1 class="display-5 text-info">
+                        {{ actividades_hoy }}
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TERCERA FILA -->
+
+    <div class="row g-3 mt-1">
+
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        👤 Usuarios
+                    </h6>
+
+                    <h1 class="display-5">
                         {{ usuarios }}
                     </h1>
 
@@ -70,96 +172,140 @@
 
         </div>
 
-    </div>
+        <div class="col-md-4">
 
-    <hr>
+            <div class="card shadow text-center">
 
-    <div class="row">
+                <div class="card-body">
 
-        <div class="col-md-6">
+                    <h6 class="text-muted">
+                        📅 Fecha
+                    </h6>
 
-            <a
-                href="{{ url_for('visitantes') }}"
-                class="btn btn-success w-100 mb-2"
-            >
-                🧍 Registro de Visitantes
-            </a>
+                    <h4 id="fechaActual"></h4>
 
-            <a
-                href="{{ url_for('empleados') }}"
-                class="btn btn-primary w-100 mb-2"
-            >
-                🚛 Registro de Empleados
-            </a>
+                </div>
 
-            <a
-                href="{{ url_for('registro_vip') }}"
-                class="btn btn-warning w-100 mb-2"
-            >
-                ⭐ Registro VIP
-            </a>
-
-            <a
-                href="{{ url_for('bitacora_turno') }}"
-                class="btn btn-secondary w-100 mb-2"
-            >
-                📒 Bitácora de Turno
-            </a>
-
-            <a
-                href="{{ url_for('actividades') }}"
-                class="btn btn-info w-100 mb-2"
-            >
-                📋 Actividades
-            </a>
-
-            <a
-                href="{{ url_for('incidentes') }}"
-                class="btn btn-danger w-100 mb-2"
-            >
-                ⚠️ Incidentes
-            </a>
+            </div>
 
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
 
-            {% if current_user.rol == "admin" %}
+            <div class="card shadow text-center">
 
-            <a
-                href="{{ url_for('historial_vip') }}"
-                class="btn btn-dark w-100 mb-2"
-            >
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        🕒 Hora
+                    </h6>
+
+                    <h4 id="horaActual"></h4>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <hr class="my-4">
+
+    <!-- ACCESOS RÁPIDOS -->
+
+    <h4 class="mb-3">
+        Accesos rápidos
+    </h4>
+
+    <div class="row g-3">
+
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('visitantes') }}" class="btn btn-success">
+                👥 Visitantes
+            </a>
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('empleados') }}" class="btn btn-primary">
+                🚛 Empleados
+            </a>
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('registro_vip') }}" class="btn btn-warning">
+                ⭐ Registro VIP
+            </a>
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('bitacora_turno') }}" class="btn btn-secondary">
+                📒 Bitácora
+            </a>
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('actividades') }}" class="btn btn-info">
+                📋 Actividades
+            </a>
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('incidentes') }}" class="btn btn-danger">
+                ⚠ Incidentes
+            </a>
+        </div>
+
+        {% if current_user.rol == "admin" %}
+
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('historial_vip') }}" class="btn btn-dark">
                 ⭐ Historial VIP
             </a>
+        </div>
 
-            <a
-                href="{{ url_for('usuarios') }}"
-                class="btn btn-dark w-100 mb-2"
-            >
-                👥 Administración de Usuarios
+        <div class="col-md-3 d-grid">
+            <a href="{{ url_for('usuarios') }}" class="btn btn-dark">
+                👥 Usuarios
             </a>
+        </div>
 
-            {% endif %}
+        {% endif %}
 
-            <a
-                href="{{ url_for('cambiar_password') }}"
-                class="btn btn-warning w-100 mb-2"
-            >
+        <div class="col-md-6 d-grid">
+            <a href="{{ url_for('cambiar_password') }}" class="btn btn-warning">
                 🔑 Cambiar Contraseña
             </a>
+        </div>
 
-            <a
-                href="{{ url_for('logout') }}"
-                class="btn btn-danger w-100"
-            >
+        <div class="col-md-6 d-grid">
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
                 🚪 Cerrar Sesión
             </a>
-
         </div>
 
     </div>
 
 </div>
+
+<script>
+
+function actualizarReloj(){
+
+    const ahora = new Date();
+
+    document.getElementById("horaActual").innerHTML =
+        ahora.toLocaleTimeString();
+
+    document.getElementById("fechaActual").innerHTML =
+        ahora.toLocaleDateString();
+
+}
+
+actualizarReloj();
+
+setInterval(actualizarReloj,1000);
+
+</script>
 
 {% endblock %}

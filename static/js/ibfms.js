@@ -1,20 +1,33 @@
-// ---------------------------
-// Reloj
-// ---------------------------
+/*=========================================================
+    IBFMS 2.0
+=========================================================*/
 
-function actualizarHora(){
+
+//=========================================================
+// FECHA Y HORA
+//=========================================================
+
+function actualizarHora() {
 
     const ahora = new Date();
 
     const fecha = document.getElementById("fecha");
     const hora = document.getElementById("hora");
 
-    if(fecha){
-        fecha.innerHTML = ahora.toLocaleDateString();
+    if (fecha) {
+
+        fecha.innerHTML = ahora.toLocaleDateString(
+            "es-MX"
+        );
+
     }
 
-    if(hora){
-        hora.innerHTML = ahora.toLocaleTimeString();
+    if (hora) {
+
+        hora.innerHTML = ahora.toLocaleTimeString(
+            "es-MX"
+        );
+
     }
 
 }
@@ -24,63 +37,147 @@ setInterval(actualizarHora,1000);
 actualizarHora();
 
 
-// ---------------------------
-// Modo oscuro
-// ---------------------------
+//=========================================================
+// MODO OSCURO
+//=========================================================
 
-const interruptor = document.getElementById("modoOscuro");
+const modoOscuro =
+document.getElementById("modoOscuro");
 
-if(interruptor){
+if(modoOscuro){
 
     if(localStorage.getItem("tema")=="oscuro"){
 
         document.body.classList.add("dark-mode");
 
-        interruptor.checked = true;
+        modoOscuro.checked=true;
 
     }
 
-    interruptor.addEventListener("change",function(){
+    modoOscuro.addEventListener(
+        "change",
+        function(){
 
-        if(this.checked){
+            if(this.checked){
 
-            document.body.classList.add("dark-mode");
+                document.body.classList.add(
+                    "dark-mode"
+                );
 
-            localStorage.setItem("tema","oscuro");
+                localStorage.setItem(
+                    "tema",
+                    "oscuro"
+                );
 
-        }else{
+            }else{
 
-            document.body.classList.remove("dark-mode");
+                document.body.classList.remove(
+                    "dark-mode"
+                );
 
-            localStorage.setItem("tema","claro");
+                localStorage.setItem(
+                    "tema",
+                    "claro"
+                );
+
+            }
 
         }
 
-    });
+    );
 
 }
 
-// --------------------
-// Menú responsive
-// --------------------
+
+//=========================================================
+// MENU LATERAL
+//=========================================================
 
 const btnMenu =
 document.getElementById("btnMenu");
 
 const sidebar =
-document.querySelector(".sidebar");
+document.getElementById("sidebar");
 
-if(btnMenu){
+const main =
+document.querySelector(".main");
+
+
+if(btnMenu && sidebar){
 
     btnMenu.addEventListener(
         "click",
         function(){
 
-            sidebar.classList.toggle(
-                "show"
-            );
+            if(window.innerWidth <= 768){
+
+                sidebar.classList.toggle(
+                    "mostrar"
+                );
+
+            }else{
+
+                sidebar.classList.toggle(
+                    "oculto"
+                );
+
+                main.classList.toggle(
+                    "expandido"
+                );
+
+            }
 
         }
     );
 
 }
+
+
+//=========================================================
+// RESPONSIVE
+//=========================================================
+
+window.addEventListener(
+    "resize",
+    function(){
+
+        if(window.innerWidth > 768){
+
+            sidebar.classList.remove(
+                "mostrar"
+            );
+
+        }
+
+    }
+
+);
+
+
+//=========================================================
+// CERRAR MENU EN CELULAR
+//=========================================================
+
+document.addEventListener(
+    "click",
+    function(e){
+
+        if(window.innerWidth <=768){
+
+            if(
+                !sidebar.contains(e.target)
+                &&
+                !btnMenu.contains(e.target)
+            ){
+
+                sidebar.classList.remove(
+                    "mostrar"
+                );
+
+            }
+
+        }
+
+    }
+
+);

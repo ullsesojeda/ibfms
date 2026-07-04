@@ -1,3 +1,5 @@
+import os
+import shutil
 from flask import (
     Flask,
     render_template,
@@ -345,19 +347,57 @@ def login():
 @login_required
 def dashboard():
 
+    from datetime import datetime
+
+    hoy = datetime.now().strftime("%d/%m/%Y")
+
     visitantes = Visitante.query.count()
 
+    visitantes_dentro = Visitante.query.filter_by(
+        salida=None
+    ).count()
+
+    empleados_dentro = Empleado.query.filter_by(
+        salida=None
+    ).count()
+
+    vip_hoy = RegistroVIP.query.filter_by(
+        fecha=hoy
+    ).count()
+
     incidentes = Incidente.query.count()
+
+    incidentes_hoy = Incidente.query.filter_by(
+        fecha=hoy
+    ).count()
+
+    actividades_hoy = Actividad.query.filter_by(
+        fecha=hoy
+    ).count()
 
     usuarios = Usuario.query.count()
 
     return render_template(
-        "dashboard.html",
-        visitantes=visitantes,
-        incidentes=incidentes,
-        usuarios=usuarios
-    )
 
+        "dashboard.html",
+
+        visitantes=visitantes,
+
+        visitantes_dentro=visitantes_dentro,
+
+        empleados_dentro=empleados_dentro,
+
+        vip_hoy=vip_hoy,
+
+        incidentes=incidentes,
+
+        incidentes_hoy=incidentes_hoy,
+
+        actividades_hoy=actividades_hoy,
+
+        usuarios=usuarios
+
+    )
 
 @app.route("/logout")
 @login_required
@@ -745,5 +785,153 @@ def administracion():
         "administracion.html"
     )
 
+@app.route("/crear_respaldo")
+@login_required
+def crear_respaldo():
+
+    # Solo el administrador puede crear respaldos
+    if current_user.rol != "admin":
+        flash(
+            "No tienes permisos.",
+            "danger"
+        )
+        return redirect(url_for("dashboard"))
+
+    carpeta_backups = "backups"
+
+    os.makedirs(
+        carpeta_backups,
+        exist_ok=True
+    )
+
+    origen = os.path.join(
+        "instance",
+        "ibfms.db"
+    )
+
+    fecha = datetime.now().strftime(
+        "%Y-%m-%d_%H-%M-%S"
+    )
+
+    destino = os.path.join(
+        carpeta_backups,
+        f"ibfms_{fecha}.db"
+    )
+
+    shutil.copy2(
+        origen,
+        destino
+    )
+
+    flash(
+        "Respaldo creado correctamente.",
+        "success"
+    )
+
+    return redirect(
+        url_for("respaldos")
+    )
+
+@app.route("/respaldos")
+@login_required
+def respaldos():
+
+    if current_user.rol != "admin":
+        return redirect(url_for("dashboard"))
+
+    carpeta = "backups"
+
+    os.makedirs(
+        carpeta,
+        exist_ok=True
+    )
+
+    archivos = sorted(
+        os.listdir(carpeta),
+        reverse=True
+    )
+
+    return render_template(
+        "respaldos.html",
+        archivos=archivos
+    )
+
+@app.route("/restaurar_respaldo/<nombre>")
+@login_required
+def restaurar_respaldo(nombre):
+
+    if current_user.rol != "admin":
+        flash("No tienes permisos.", "danger")
+        return redirect(url_for("dashboard"))
+
+    origen = os.path.join("backups", nombre)
+
+    destino = os.path.join("instance", "ibfms.db")
+
+    if not os.path.exists(origen):
+
+        flash("El respaldo no existe.", "danger")
+        return redirect(url_for("respaldos"))
+
+    shutil.copy2(origen, destino)
+
+    flash(
+        "Respaldo restaurado correctamente. Reinicia la aplicación.",
+        "success"
+    )
+
+    return redirect(url_for("respaldos"))
+
+@app.route("/eliminar_respaldo/<nombre>")
+@login_required
+def eliminar_respaldo(nombre):
+
+    if current_user.rol != "admin":
+
+        flash(
+            "No tienes permisos.",
+            "danger"
+        )
+
+        return redirect(url_for("dashboard"))
+
+    archivo = os.path.join(
+        "backups",
+        nombre
+    )
+
+    if not os.path.exists(archivo):
+
+        flash(
+            "El respaldo no existe.",
+            "warning"
+        )
+
+        return redirect(url_for("respaldos"))
+
+    archivos = os.listdir("backups")
+
+    if len(archivos) <= 1:
+
+        flash(
+            "No se puede eliminar el último respaldo.",
+            "warning"
+        )
+
+        return redirect(url_for("respaldos"))
+
+    os.remove(archivo)
+
+    flash(
+        "Respaldo eliminado correctamente.",
+        "success"
+    )
+
+    return redirect(url_for("respaldos"))
+
 if __name__ == "__main__":
-    app.run(debug=True)   
+
+    with app.app_context():
+        db.create_all()
+
+    app.run(debug=True)

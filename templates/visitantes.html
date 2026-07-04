@@ -81,22 +81,25 @@ Exportar a Excel
 
 <div class="table-responsive">
 
-<table class="table table-striped">
+<table
+    id="tablaVisitantes"
+    class="table table-striped table-bordered table-hover"
+>
 
 <thead>
 
 <tr>
-<th>Fecha</th>
-<th>Nombre</th>
-<th>ID</th>
-<th>Placas</th>
-<th>Vehículo</th>
-<th>Visita</th>
-<th>Motivo</th>
-<th>Entrada</th>
-<th>Salida</th>
-<th>Guardia</th>
-<th>Acción</th>
+    <th>Fecha</th>
+    <th>Nombre</th>
+    <th>ID</th>
+    <th>Placas</th>
+    <th>Vehículo</th>
+    <th>Visita</th>
+    <th>Motivo</th>
+    <th>Entrada</th>
+    <th>Salida</th>
+    <th>Guardia</th>
+    <th>Acción</th>
 </tr>
 
 </thead>
@@ -121,12 +124,14 @@ Exportar a Excel
 <td>
 
 {% if not v.salida %}
+
 <a
     href="{{ url_for('registrar_salida', id=v.id) }}"
     class="btn btn-warning btn-sm"
 >
-Salida
+    Salida
 </a>
+
 {% endif %}
 
 </td>
