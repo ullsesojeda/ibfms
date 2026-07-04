@@ -4,9 +4,13 @@ $(document).ready(function(){
 
         $("#tablaVisitantes").DataTable({
 
-            responsive:true,
+            responsive: false,
 
-            pageLength:10,
+            scrollX: true,
+
+            autoWidth: false,
+
+            pageLength: 10,
 
             language:{
                 url:"https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
@@ -14,6 +18,9 @@ $(document).ready(function(){
 
         });
 
+    }
+
+});
     }
 
 });
@@ -120,6 +127,26 @@ if($("#tablaVIP").length){
 if($("#tablaUsuarios").length){
 
     $("#tablaUsuarios").DataTable({
+
+        responsive:true,
+
+        pageLength:10,
+
+        lengthMenu:[
+            [10,25,50,100,-1],
+            [10,25,50,100,"Todos"]
+        ],
+
+        language:{
+            url:"https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
+        }
+
+    });
+
+}
+if($("#tablaControlVehiculos").length){
+
+    $("#tablaControlVehiculos").DataTable({
 
         responsive:true,
 

@@ -737,3 +737,79 @@ h1,h2,h3,h4,h5{
     color:white;
 
 }
+/* ===========================
+   TABLAS RESPONSIVAS
+=========================== */
+
+.table-responsive{
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table{
+    white-space: nowrap;
+}
+
+.table th,
+.table td{
+    vertical-align: middle;
+}
+/* ==========================================
+   TABLA DE VISITANTES CON COLUMNAS FIJAS
+========================================== */
+
+#tablaVisitantes{
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#tablaVisitantes th,
+#tablaVisitantes td{
+    white-space: nowrap;
+    background-color: var(--bs-body-bg);
+}
+
+/* FECHA */
+
+#tablaVisitantes th:nth-child(1),
+#tablaVisitantes td:nth-child(1){
+
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    min-width: 120px;
+
+}
+
+/* NOMBRE */
+
+#tablaVisitantes th:nth-child(2),
+#tablaVisitantes td:nth-child(2){
+
+    position: sticky;
+    left: 120px;
+    z-index: 5;
+    min-width: 220px;
+
+}
+
+/* ACCIONES */
+
+#tablaVisitantes th:last-child,
+#tablaVisitantes td:last-child{
+
+    position: sticky;
+    right: 0;
+    z-index: 5;
+    min-width: 150px;
+
+}
+
+/* ENCABEZADOS */
+
+#tablaVisitantes thead th{
+
+    z-index: 10;
+
+}

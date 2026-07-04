@@ -159,3 +159,38 @@ class Empleado(db.Model):
     guardia = db.Column(
         db.String(50)
     )
+
+class ControlVehiculo(db.Model):
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    fecha = db.Column(
+        db.String(20)
+    )
+
+    hora = db.Column(
+        db.String(10)
+    )
+
+    chofer = db.Column(
+        db.String(100)
+    )
+
+    vehiculo = db.Column(
+        db.String(100)
+    )
+
+    movimiento = db.Column(
+        db.String(20)
+    )
+
+    puesto = db.Column(
+        db.String(30)
+    )
+
+    guardia = db.Column(
+        db.String(100)
+    )   

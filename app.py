@@ -31,7 +31,8 @@ from models import (
     Actividad,
     BitacoraTurno,
     RegistroVIP,
-    Empleado
+    Empleado,
+    ControlVehiculo
 )
 
 from datetime import datetime
@@ -711,6 +712,48 @@ def registro_vip():
 
     return render_template(
         "registro_vip.html"
+    )
+
+@app.route("/control_vehiculos", methods=["GET", "POST"])
+@login_required
+def control_vehiculos():
+
+    if request.method == "POST":
+
+        fecha = datetime.now().strftime("%d/%m/%Y")
+        hora = datetime.now().strftime("%H:%M:%S")
+
+        nuevo = ControlVehiculo(
+
+            fecha=fecha,
+            hora=hora,
+            chofer=request.form["chofer"],
+            vehiculo=request.form["vehiculo"],
+            movimiento=request.form["movimiento"],
+            puesto=request.form["puesto"],
+            guardia=current_user.usuario
+
+        )
+
+        db.session.add(nuevo)
+        db.session.commit()
+
+        flash(
+            "Movimiento registrado correctamente.",
+            "success"
+        )
+
+        return redirect(
+            url_for("control_vehiculos")
+        )
+
+    movimientos = ControlVehiculo.query.order_by(
+        ControlVehiculo.id.desc()
+    ).all()
+
+    return render_template(
+        "control_vehiculos.html",
+        movimientos=movimientos
     )
 
 @app.route("/historial_vip")
