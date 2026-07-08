@@ -18,6 +18,7 @@ class Visitante(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.String(30))
+    puesto = db.Column(db.String(20))
     nombre = db.Column(db.String(200))
     identificacion = db.Column(db.String(100))
     placas = db.Column(db.String(100))
@@ -27,7 +28,7 @@ class Visitante(db.Model):
     entrada = db.Column(db.String(20))
     salida = db.Column(db.String(20))
     guardia = db.Column(db.String(50))
-
+    guardia_salida = db.Column(db.String(50))
 
 class Incidente(db.Model):
     __tablename__ = "incidentes"

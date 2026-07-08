@@ -11,34 +11,97 @@
 
 <div class="row">
 
-<div class="col-md-4 mb-3">
+<div class="col-md-3 mb-3">
+
+<label>Puesto</label>
+
+<select
+    name="puesto"
+    class="form-select"
+    required
+>
+
+    <option value="">Seleccione...</option>
+
+    <option>PUESTO 1</option>
+    <option>PUESTO 2</option>
+    <option>PUESTO 3</option>
+
+</select>
+
+</div>
+
+<div class="col-md-5 mb-3">
+
 <label>Nombre</label>
-<input type="text" name="nombre" class="form-control" required>
+
+<input
+    type="text"
+    name="nombre"
+    class="form-control"
+    required
+>
+
 </div>
 
 <div class="col-md-4 mb-3">
+
 <label>Identificación</label>
-<input type="text" name="identificacion" class="form-control">
+
+<input
+    type="text"
+    name="identificacion"
+    class="form-control"
+>
+
 </div>
 
 <div class="col-md-4 mb-3">
+
 <label>Placas</label>
-<input type="text" name="placas" class="form-control">
+
+<input
+    type="text"
+    name="placas"
+    class="form-control"
+>
+
 </div>
 
 <div class="col-md-4 mb-3">
+
 <label>Vehículo</label>
-<input type="text" name="vehiculo" class="form-control">
+
+<input
+    type="text"
+    name="vehiculo"
+    class="form-control"
+>
+
 </div>
 
 <div class="col-md-4 mb-3">
+
 <label>Visita a</label>
-<input type="text" name="visita" class="form-control">
+
+<input
+    type="text"
+    name="visita"
+    class="form-control"
+>
+
 </div>
 
-<div class="col-md-4 mb-3">
+<div class="col-md-12 mb-3">
+
 <label>Motivo</label>
-<input type="text" name="motivo" class="form-control">
+
+<input
+    type="text"
+    name="motivo"
+    class="form-control"
+>
+
 </div>
 
 <div class="mb-3">
@@ -57,17 +120,18 @@
         Incidentes
     </a>
 
-</div>
+    <button
+        type="submit"
+        class="btn btn-success"
+    >
+        Guardar visitante
+    </button>
 
 </div>
 
-<button class="btn btn-success">
-Guardar visitante
-</button>
-
-</form>
-
 </div>
+
+</form></div>
 </div>
 
 <div class="mb-3">
@@ -90,6 +154,7 @@ Exportar a Excel
 
 <tr>
     <th>Fecha</th>
+    <th>Puesto</th>
     <th>Nombre</th>
     <th>ID</th>
     <th>Placas</th>
@@ -98,7 +163,8 @@ Exportar a Excel
     <th>Motivo</th>
     <th>Entrada</th>
     <th>Salida</th>
-    <th>Guardia</th>
+    <th>Guardia Entrada</th>
+    <th>Guardia Salida</th>
     <th>Acción</th>
 </tr>
 
@@ -111,6 +177,7 @@ Exportar a Excel
 <tr>
 
 <td>{{ v.fecha }}</td>
+<td>{{ v.puesto }}</td>
 <td>{{ v.nombre }}</td>
 <td>{{ v.identificacion }}</td>
 <td>{{ v.placas }}</td>
@@ -118,8 +185,9 @@ Exportar a Excel
 <td>{{ v.visita }}</td>
 <td>{{ v.motivo }}</td>
 <td>{{ v.entrada }}</td>
-<td>{{ v.salida or '' }}</td>
+<td>{{ v.salida or "" }}</td>
 <td>{{ v.guardia }}</td>
+<td>{{ v.guardia_salida or "" }}</td>
 
 <td>
 
@@ -128,9 +196,19 @@ Exportar a Excel
 <a
     href="{{ url_for('registrar_salida', id=v.id) }}"
     class="btn btn-warning btn-sm"
+    onclick="return confirm('¿Registrar la salida de este visitante?')"
 >
     Salida
 </a>
+
+{% else %}
+
+<button
+    class="btn btn-success btn-sm"
+    disabled
+>
+    ✓ Salida registrada
+</button>
 
 {% endif %}
 

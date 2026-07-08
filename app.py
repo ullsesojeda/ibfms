@@ -261,19 +261,17 @@ def bitacora_turno():
         bitacora=datos
     )
 
-@app.route(
-    "/registrar_salida/<int:id>"
-)
+@app.route("/registrar_salida/<int:id>")
 @login_required
 def registrar_salida(id):
 
     visitante = Visitante.query.get_or_404(id)
 
-    visitante.salida = (
-        datetime.now().strftime(
-            "%H:%M:%S"
-        )
+    visitante.salida = datetime.now().strftime(
+        "%H:%M:%S"
     )
+
+    visitante.guardia_salida = current_user.usuario
 
     db.session.commit()
 
@@ -472,6 +470,7 @@ def visitantes():
             vehiculo=request.form["vehiculo"],
             visita=request.form["visita"],
             motivo=request.form["motivo"],
+            puesto=request.form["puesto"],
             entrada=datetime.now().strftime(
                 "%H:%M:%S"
             ),
