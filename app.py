@@ -42,6 +42,20 @@ from flask import send_file
 app = Flask(__name__)
 app.config.from_object(Config)
 
+if os.name == "nt":
+
+    RUTA_DB = os.path.join("instance", "ibfms.db")
+    RUTA_BACKUPS = "backups"
+    RUTA_EXPORTS = "exports"
+    RUTA_UPLOADS = "uploads"
+
+else:
+
+    RUTA_DB = "/montesion/vigilancia/ibfms.db"
+    RUTA_BACKUPS = "/montesion/vigilancia/backups"
+    RUTA_EXPORTS = "/montesion/vigilancia/exports"
+    RUTA_UPLOADS = "/montesion/vigilancia/uploads"
+
 db.init_app(app)
 
 login_manager = LoginManager()
@@ -840,17 +854,16 @@ def crear_respaldo():
         )
         return redirect(url_for("dashboard"))
 
-    carpeta_backups = "backups"
+    carpeta_backups = RUTA_BACKUPS
+
+    origen = RUTA_DB
 
     os.makedirs(
         carpeta_backups,
         exist_ok=True
     )
 
-    origen = os.path.join(
-        "instance",
-        "ibfms.db"
-    )
+    origen = "/montesion/vigilancia/ibfms.db"
 
     fecha = datetime.now().strftime(
         "%Y-%m-%d_%H-%M-%S"
@@ -882,7 +895,7 @@ def respaldos():
     if current_user.rol != "admin":
         return redirect(url_for("dashboard"))
 
-    carpeta = "backups"
+    carpeta = RUTA_BACKUPS
 
     os.makedirs(
         carpeta,
@@ -907,9 +920,12 @@ def restaurar_respaldo(nombre):
         flash("No tienes permisos.", "danger")
         return redirect(url_for("dashboard"))
 
-    origen = os.path.join("backups", nombre)
+    origen = os.path.join(
+    RUTA_BACKUPS,
+    nombre
+    )
 
-    destino = os.path.join("instance", "ibfms.db")
+    destino = RUTA_DB    
 
     if not os.path.exists(origen):
 
@@ -939,9 +955,11 @@ def eliminar_respaldo(nombre):
         return redirect(url_for("dashboard"))
 
     archivo = os.path.join(
-        "backups",
-        nombre
+    RUTA_BACKUPS,
+    nombre
     )
+
+    archivos = os.listdir(RUTA_BACKUPS)
 
     if not os.path.exists(archivo):
 
@@ -952,7 +970,7 @@ def eliminar_respaldo(nombre):
 
         return redirect(url_for("respaldos"))
 
-    archivos = os.listdir("backups")
+    archivos = os.listdir("/montesion/vigilancia/backups")
 
     if len(archivos) <= 1:
 
