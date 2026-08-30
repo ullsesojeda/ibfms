@@ -1,0 +1,815 @@
+/*=========================================================
+    IBFMS 2.0
+    ESTILOS GENERALES
+=========================================================*/
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+
+    background:#f4f6f9;
+
+    overflow-x:hidden;
+
+    transition:.30s;
+
+}
+
+
+/*=========================================================
+    SIDEBAR
+=========================================================*/
+
+.sidebar{
+
+    position:fixed;
+
+    top:0;
+
+    left:0;
+
+    width:260px;
+
+    height:100vh;
+
+    background:#1f2937;
+
+    color:#fff;
+
+    overflow-y:auto;
+
+    transition:.30s;
+
+    z-index:1000;
+
+    box-shadow:3px 0 10px rgba(0,0,0,.25);
+
+}
+
+.sidebar .logo{
+
+    text-align:center;
+
+    padding:25px 15px;
+
+}
+
+.sidebar .logo h3{
+
+    margin-bottom:5px;
+
+    font-weight:bold;
+
+}
+
+.sidebar .logo small{
+
+    color:#c7d2fe;
+
+}
+
+
+/*=========================================================
+    MENU
+=========================================================*/
+
+.sidebar a{
+
+    display:block;
+
+    padding:14px 22px;
+
+    color:white;
+
+    text-decoration:none;
+
+    transition:.25s;
+
+    font-size:15px;
+
+}
+
+.sidebar a i{
+
+    width:25px;
+
+}
+
+.sidebar a:hover{
+
+    background:#374151;
+
+}
+
+.sidebar a.active{
+
+    background:#0d6efd;
+
+    border-left:5px solid white;
+
+    font-weight:bold;
+
+}
+
+
+/*=========================================================
+    MAIN
+=========================================================*/
+
+.main{
+
+    margin-left:260px;
+
+    min-height:100vh;
+
+    transition:.30s;
+
+}
+
+
+/*=========================================================
+    TOPBAR
+=========================================================*/
+
+.topbar{
+
+    height:70px;
+
+    background:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 25px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.10);
+
+    position:sticky;
+
+    top:0;
+
+    z-index:900;
+
+}
+
+.titulo h4{
+
+    margin:0;
+
+    font-weight:600;
+
+}
+
+.usuario{
+
+    text-align:right;
+
+}
+
+
+/*=========================================================
+    BOTON MENU
+=========================================================*/
+
+#btnMenu{
+
+    width:45px;
+
+    height:45px;
+
+    border-radius:10px;
+
+}
+
+
+/*=========================================================
+    CONTENIDO
+=========================================================*/
+
+.page{
+
+    padding:30px;
+
+}
+
+
+/*=========================================================
+    LINEAS
+=========================================================*/
+
+.sidebar hr{
+
+    border-color:rgba(255,255,255,.15);
+
+}
+/*=========================================================
+    TARJETAS
+=========================================================*/
+
+.card{
+
+    border:none;
+
+    border-radius:15px;
+
+    box-shadow:0 6px 18px rgba(0,0,0,.12);
+
+    transition:.30s;
+
+    overflow:hidden;
+
+}
+
+.card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:0 12px 25px rgba(0,0,0,.20);
+
+}
+
+.card-header{
+
+    font-weight:bold;
+
+}
+
+
+/*=========================================================
+    BOTONES
+=========================================================*/
+
+.btn{
+
+    border-radius:10px;
+
+    transition:.25s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.btn-success{
+
+    box-shadow:0 4px 10px rgba(25,135,84,.25);
+
+}
+
+.btn-primary{
+
+    box-shadow:0 4px 10px rgba(13,110,253,.25);
+
+}
+
+.btn-danger{
+
+    box-shadow:0 4px 10px rgba(220,53,69,.25);
+
+}
+
+
+/*=========================================================
+    FORMULARIOS
+=========================================================*/
+
+.form-control,
+.form-select{
+
+    border-radius:10px;
+
+    border:1px solid #ced4da;
+
+    transition:.25s;
+
+}
+
+.form-control:focus,
+.form-select:focus{
+
+    border-color:#0d6efd;
+
+    box-shadow:0 0 0 .2rem rgba(13,110,253,.15);
+
+}
+
+
+/*=========================================================
+    TABLAS
+=========================================================*/
+
+.table{
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    background:white;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+}
+
+.table thead{
+
+    background:#0d6efd;
+
+    color:white;
+
+}
+
+.table thead th{
+
+    border:none;
+
+    padding:14px;
+
+    font-weight:600;
+
+}
+
+.table td{
+
+    vertical-align:middle;
+
+}
+
+.table tbody tr{
+
+    transition:.20s;
+
+}
+
+.table tbody tr:hover{
+
+    background:#eef5ff;
+
+}
+
+
+/*=========================================================
+    ALERTAS
+=========================================================*/
+
+.alert{
+
+    border:none;
+
+    border-radius:12px;
+
+    box-shadow:0 3px 8px rgba(0,0,0,.08);
+
+}
+
+
+/*=========================================================
+    BADGES
+=========================================================*/
+
+.badge{
+
+    padding:8px 12px;
+
+    border-radius:20px;
+
+}
+
+
+/*=========================================================
+    TITULOS
+=========================================================*/
+
+h1,h2,h3,h4,h5{
+
+    font-weight:600;
+
+}
+
+
+/*=========================================================
+    SCROLLBAR
+=========================================================*/
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#ececec;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#9ca3af;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#6b7280;
+
+}
+/*=========================================================
+    MODO OSCURO
+=========================================================*/
+
+.dark-mode{
+
+    background:#0f172a;
+
+    color:#f8fafc;
+
+}
+
+.dark-mode .main{
+
+    background:#0f172a;
+
+}
+
+.dark-mode .topbar{
+
+    background:#1e293b;
+
+    color:white;
+
+    border-bottom:1px solid #334155;
+
+}
+
+.dark-mode .page{
+
+    background:#0f172a;
+
+}
+
+.dark-mode .card{
+
+    background:#1e293b;
+
+    color:white;
+
+}
+
+.dark-mode .table{
+
+    background:#1e293b;
+
+    color:white;
+
+}
+
+.dark-mode .table tbody tr:hover{
+
+    background:#334155;
+
+}
+
+.dark-mode .table td{
+
+    color:white;
+
+}
+
+.dark-mode .form-control,
+.dark-mode .form-select{
+
+    background:#334155;
+
+    color:white;
+
+    border:1px solid #475569;
+
+}
+
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus{
+
+    background:#334155;
+
+    color:white;
+
+}
+
+.dark-mode .alert{
+
+    color:white;
+
+}
+
+.dark-mode .text-muted{
+
+    color:#cbd5e1 !important;
+
+}
+
+
+/*=========================================================
+    MENU RESPONSIVE
+=========================================================*/
+
+.sidebar.oculto{
+
+    left:-260px;
+
+}
+
+.main.expandido{
+
+    margin-left:0;
+
+}
+
+
+/*=========================================================
+    CELULAR
+=========================================================*/
+
+@media (max-width:768px){
+
+    .sidebar{
+
+        left:-260px;
+
+    }
+
+    .sidebar.mostrar{
+
+        left:0;
+
+    }
+
+    .main{
+
+        margin-left:0;
+
+    }
+
+    .topbar{
+
+        padding:10px 15px;
+
+    }
+
+    .page{
+
+        padding:15px;
+
+    }
+
+    .usuario{
+
+        display:none;
+
+    }
+
+}
+
+
+/*=========================================================
+    TABLET
+=========================================================*/
+
+@media (min-width:769px) and (max-width:1100px){
+
+    .sidebar{
+
+        width:220px;
+
+    }
+
+    .main{
+
+        margin-left:220px;
+
+    }
+
+}
+
+
+/*=========================================================
+    ANIMACIONES
+=========================================================*/
+
+.sidebar,
+.main,
+.card,
+.btn,
+.table,
+.topbar{
+
+    transition:.30s ease;
+
+}
+
+
+/*=========================================================
+    MENU TOGGLE
+=========================================================*/
+
+.menu-toggle{
+
+    cursor:pointer;
+
+}
+
+.menu-toggle:hover{
+
+    transform:scale(1.05);
+
+}
+
+
+/*=========================================================
+    PIE
+=========================================================*/
+
+.footer{
+
+    padding:15px;
+
+    text-align:center;
+
+    color:#6b7280;
+
+    font-size:13px;
+
+}
+/*=========================================================
+    TABLAS - MODO OSCURO
+=========================================================*/
+
+.dark-mode table{
+
+    color:#f8fafc !important;
+
+}
+
+.dark-mode .table{
+
+    background:#1e293b !important;
+
+    color:#f8fafc !important;
+
+}
+
+.dark-mode .table thead{
+
+    background:#0f172a !important;
+
+}
+
+.dark-mode .table thead th{
+
+    color:white !important;
+
+}
+
+.dark-mode .table tbody tr{
+
+    background:#1e293b !important;
+
+}
+
+.dark-mode .table tbody td{
+
+    background:#1e293b !important;
+
+    color:#f8fafc !important;
+
+    border-color:#475569 !important;
+
+}
+
+.dark-mode .table-striped tbody tr:nth-of-type(odd){
+
+    background:#273449 !important;
+
+}
+
+.dark-mode .table-hover tbody tr:hover{
+
+    background:#334155 !important;
+
+}
+
+.dark-mode .table-bordered{
+
+    border-color:#475569 !important;
+
+}
+/*=========================================================
+    BOTÓN DEL MENÚ - MODO OSCURO
+=========================================================*/
+
+.dark-mode #btnMenu{
+
+    background:#334155;
+
+    color:white;
+
+    border:1px solid #64748b;
+
+}
+
+.dark-mode #btnMenu:hover{
+
+    background:#475569;
+
+    color:white;
+
+}
+/* ===========================
+   TABLAS RESPONSIVAS
+=========================== */
+
+.table-responsive{
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table{
+    white-space: nowrap;
+}
+
+.table th,
+.table td{
+    vertical-align: middle;
+}
+/* ==========================================
+   TABLA DE VISITANTES CON COLUMNAS FIJAS
+========================================== */
+
+#tablaVisitantes{
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#tablaVisitantes th,
+#tablaVisitantes td{
+    white-space: nowrap;
+    background-color: var(--bs-body-bg);
+}
+
+/* FECHA */
+
+#tablaVisitantes th:nth-child(1),
+#tablaVisitantes td:nth-child(1){
+
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    min-width: 120px;
+
+}
+
+/* NOMBRE */
+
+#tablaVisitantes th:nth-child(2),
+#tablaVisitantes td:nth-child(2){
+
+    position: sticky;
+    left: 120px;
+    z-index: 5;
+    min-width: 220px;
+
+}
+
+/* ACCIONES */
+
+#tablaVisitantes th:last-child,
+#tablaVisitantes td:last-child{
+
+    position: sticky;
+    right: 0;
+    z-index: 5;
+    min-width: 150px;
+
+}
+
+/* ENCABEZADOS */
+
+#tablaVisitantes thead th{
+
+    z-index: 10;
+
+}

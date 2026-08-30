@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<h3>📤 Registrar Entrega</h3>
+
+<hr>
+
+<div class="card p-3 mb-4">
+
+    <h5>
+        Registro:
+        <strong>{{ objeto.numero_registro }}</strong>
+    </h5>
+
+    <p>
+        <strong>Tipo:</strong>
+        {{ objeto.tipo_objeto }}
+    </p>
+
+    <p>
+        <strong>Descripción:</strong>
+        {{ objeto.descripcion }}
+    </p>
+
+    <p>
+        <strong>Recibido por:</strong>
+        {{ objeto.recibido_por }}
+    </p>
+
+    <p>
+        <strong>Puesto de recepción:</strong>
+        {{ objeto.puesto_recepcion }}
+    </p>
+
+</div>
+
+
+<form method="POST">
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Entregado a
+        </label>
+
+        <input
+            type="text"
+            name="entregado_a"
+            class="form-control"
+            placeholder="Nombre de quien recibe el objeto"
+            required
+        >
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Entregado por
+        </label>
+
+        <input
+            type="text"
+            class="form-control"
+            value="{{ current_user.usuario }}"
+            readonly
+        >
+
+    </div>
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Puesto
+        </label>
+
+        <input
+            type="text"
+            class="form-control"
+            value="{{ objeto.puesto_recepcion }}"
+            readonly
+        >
+
+    </div>
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Observaciones de entrega
+        </label>
+
+        <textarea
+            name="observaciones_entrega"
+            class="form-control"
+            rows="4"
+            placeholder="Observaciones..."
+        ></textarea>
+
+    </div>
+
+
+    <button
+        type="submit"
+        class="btn btn-success"
+    >
+        📤 Confirmar entrega
+    </button>
+
+
+    <a
+        href="{{ url_for('objetos_custodia') }}"
+        class="btn btn-secondary"
+    >
+        Cancelar
+    </a>
+
+</form>
+
+{% endblock %}

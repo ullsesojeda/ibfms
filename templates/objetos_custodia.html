@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<h3>📦 Objetos en Custodia</h3>
+<a
+    href="{{ url_for('dashboard') }}"
+    class="btn btn-secondary mb-3"
+>
+    🏠 Regresar al Dashboard
+</a>
+<!-- ============================= -->
+<!-- BUSCADOR -->
+<!-- ============================= -->
+
+<form
+    method="GET"
+    class="mb-4"
+>
+
+    <div class="input-group">
+
+        <input
+            type="text"
+            name="buscar"
+            class="form-control"
+            placeholder="🔎 Buscar por registro, objeto, persona o guardia..."
+            value="{{ request.args.get('buscar', '') }}"
+        >
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            🔎 Buscar
+        </button>
+
+        {% if request.args.get('buscar') %}
+
+        <a
+            href="{{ url_for('objetos_custodia') }}"
+            class="btn btn-secondary"
+        >
+            Limpiar
+        </a>
+
+        {% endif %}
+
+    </div>
+
+</form>
+
+
+<!-- ============================= -->
+<!-- REGISTRAR RECEPCIÓN -->
+<!-- ============================= -->
+
+<h4>Registrar recepción</h4>
+
+<form method="POST">
+
+    <div class="mb-3">
+
+        <label>Tipo de objeto</label>
+
+        <select
+            name="tipo_objeto"
+            class="form-control"
+            required
+        >
+
+            <option value="">
+                Seleccionar...
+            </option>
+
+            <option value="Paquete">
+                Paquete
+            </option>
+
+            <option value="Llaves">
+                Llaves
+            </option>
+
+            <option value="Documento">
+                Documento
+            </option>
+
+            <option value="Objeto encontrado">
+                Objeto encontrado
+            </option>
+
+            <option value="Otro">
+                Otro
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label>Descripción</label>
+
+        <textarea
+            name="descripcion"
+            class="form-control"
+            rows="3"
+            required
+        ></textarea>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label>Entregado por</label>
+
+        <input
+            type="text"
+            name="entregado_por"
+            class="form-control"
+            required
+        >
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label>Recibido por</label>
+
+        <input
+            type="text"
+            class="form-control"
+            value="{{ current_user.usuario }}"
+            readonly
+        >
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label>Puesto donde se recibe</label>
+
+        <select
+            name="puesto_recepcion"
+            class="form-control"
+            required
+        >
+
+            <option value="">
+                Seleccionar...
+            </option>
+
+            <option value="Puesto 1">
+                Puesto 1
+            </option>
+
+            <option value="Puesto 2">
+                Puesto 2
+            </option>
+
+            <option value="Puesto 3">
+                Puesto 3
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label>Observaciones</label>
+
+        <textarea
+            name="observaciones_recepcion"
+            class="form-control"
+            rows="3"
+        ></textarea>
+
+    </div>
+
+
+    <button
+        type="submit"
+        class="btn btn-primary"
+    >
+        📦 Registrar recepción
+    </button>
+
+</form>
+
+
+<hr>
+
+
+<!-- ============================= -->
+<!-- LISTADO -->
+<!-- ============================= -->
+
+<h4>Objetos registrados</h4>
+
+<div class="table-responsive">
+
+<table class="table table-striped table-bordered">
+
+<thead>
+
+<tr>
+
+    <th>Registro</th>
+
+    <th>Fecha recepción</th>
+
+    <th>Tipo</th>
+
+    <th>Descripción</th>
+
+    <th>Entregado por</th>
+
+    <th>Recibido por</th>
+
+    <th>Puesto</th>
+
+    <th>Estado</th>
+
+    <th>Entregado a</th>
+
+    <th>Entregado por</th>
+
+    <th>Fecha de entrega</th>
+
+    <th>Acción</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+{% for objeto in objetos %}
+
+<tr>
+
+    <td>
+        <strong>
+            {{ objeto.numero_registro }}
+        </strong>
+    </td>
+
+
+    <td>
+        {{ objeto.fecha_recepcion }}
+    </td>
+
+
+    <td>
+        {{ objeto.tipo_objeto }}
+    </td>
+
+
+    <td>
+        {{ objeto.descripcion }}
+    </td>
+
+
+    <td>
+        {{ objeto.entregado_por }}
+    </td>
+
+
+    <td>
+        {{ objeto.recibido_por }}
+    </td>
+
+
+    <td>
+        {{ objeto.puesto_recepcion }}
+    </td>
+
+
+    <td>
+
+        {% if objeto.estado == "En custodia" %}
+
+            <span class="badge bg-warning text-dark">
+                En custodia
+            </span>
+
+        {% else %}
+
+            <span class="badge bg-success">
+                Entregado
+            </span>
+
+        {% endif %}
+
+    </td>
+
+
+    <td>
+
+        {% if objeto.estado == "Entregado" %}
+
+            {{ objeto.entregado_a }}
+
+        {% else %}
+
+            -
+
+        {% endif %}
+
+    </td>
+
+
+    <td>
+
+        {% if objeto.estado == "Entregado" %}
+
+            {{ objeto.entregado_por_guardia }}
+
+        {% else %}
+
+            -
+
+        {% endif %}
+
+    </td>
+
+
+    <td>
+
+        {% if objeto.estado == "Entregado" %}
+
+            {{ objeto.fecha_entrega }}
+
+        {% else %}
+
+            -
+
+        {% endif %}
+
+    </td>
+
+
+    <td>
+
+        {% if objeto.estado == "En custodia" %}
+
+            <a
+                href="{{ url_for('entregar_objeto', id=objeto.id) }}"
+                class="btn btn-success btn-sm"
+            >
+                📤 Entregar
+            </a>
+
+        {% else %}
+
+            <span class="text-success">
+                ✓ Entregado
+            </span>
+
+        {% endif %}
+
+    </td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+    <td
+        colspan="12"
+        class="text-center"
+    >
+        No hay objetos registrados.
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

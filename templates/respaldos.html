@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2 class="mb-4">
+    Centro de Respaldos
+</h2>
+
+<div class="mb-3">
+
+    <a
+        href="{{ url_for('crear_respaldo') }}"
+        class="btn btn-success"
+    >
+        💾 Crear Respaldo
+    </a>
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-secondary"
+    >
+        Regresar
+    </a>
+
+</div>
+
+<div class="table-responsive">
+
+<table
+    id="tablaRespaldos"
+    class="table table-striped table-bordered table-hover align-middle"
+>
+
+    <thead class="table-dark">
+
+        <tr>
+
+            <th>Archivo</th>
+
+            <th style="width:250px;">
+                Acciones
+            </th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for archivo in archivos %}
+
+        <tr>
+
+            <td>{{ archivo }}</td>
+
+            <td>
+
+                <a
+                    href="{{ url_for('restaurar_respaldo', nombre=archivo) }}"
+                    class="btn btn-warning btn-sm"
+                    onclick="return confirm('¿Restaurar este respaldo?')"
+                >
+                    ♻ Restaurar
+                </a>
+
+                {% if archivos|length > 1 %}
+
+                <a
+                    href="{{ url_for('eliminar_respaldo', nombre=archivo) }}"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('¿Eliminar este respaldo?')"
+                >
+                    🗑 Eliminar
+                </a>
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+</div>
+
+{% endblock %}
