@@ -1,14 +1,18 @@
+```html
 {% extends 'base.html' %}
 
 {% block contenido %}
 
 <h3>📦 Objetos en Custodia</h3>
+
 <a
     href="{{ url_for('dashboard') }}"
     class="btn btn-secondary mb-3"
 >
     🏠 Regresar al Dashboard
 </a>
+
+
 <!-- ============================= -->
 <!-- BUSCADOR -->
 <!-- ============================= -->
@@ -24,7 +28,7 @@
             type="text"
             name="buscar"
             class="form-control"
-            placeholder="🔎 Buscar por registro, objeto, persona o guardia..."
+            placeholder="🔎 Buscar por registro, objeto, persona, guardia u observaciones..."
             value="{{ request.args.get('buscar', '') }}"
         >
 
@@ -197,11 +201,14 @@
 <hr>
 
 
-<!-- ============================= -->
-<!-- LISTADO -->
-<!-- ============================= -->
+<!-- ========================================================== -->
+<!-- OBJETOS ACTUALMENTE EN CUSTODIA -->
+<!-- ========================================================== -->
 
-<h4>Objetos registrados</h4>
+<h4 class="mt-4">
+    📦 Objetos actualmente en custodia
+</h4>
+
 
 <div class="table-responsive">
 
@@ -212,6 +219,10 @@
 <tr>
 
     <th>Registro</th>
+
+    <th>Estado</th>
+
+    <th>Acción</th>
 
     <th>Fecha recepción</th>
 
@@ -225,15 +236,7 @@
 
     <th>Puesto</th>
 
-    <th>Estado</th>
-
-    <th>Entregado a</th>
-
-    <th>Entregado por</th>
-
-    <th>Fecha de entrega</th>
-
-    <th>Acción</th>
+    <th>Observaciones</th>
 
 </tr>
 
@@ -242,9 +245,11 @@
 
 <tbody>
 
-{% for objeto in objetos %}
+{% for objeto in objetos_custodia %}
 
 <tr>
+
+    <!-- Registro -->
 
     <td>
         <strong>
@@ -253,117 +258,278 @@
     </td>
 
 
+    <!-- Estado -->
+
+    <td>
+
+        <span class="badge bg-warning text-dark">
+            En custodia
+        </span>
+
+    </td>
+
+
+    <!-- Acción -->
+
+    <td>
+
+        <a
+            href="{{ url_for('entregar_objeto', id=objeto.id) }}"
+            class="btn btn-success btn-sm"
+        >
+            📤 Entregar
+        </a>
+
+    </td>
+
+
+    <!-- Fecha recepción -->
+
     <td>
         {{ objeto.fecha_recepcion }}
     </td>
 
+
+    <!-- Tipo -->
 
     <td>
         {{ objeto.tipo_objeto }}
     </td>
 
 
+    <!-- Descripción -->
+
     <td>
         {{ objeto.descripcion }}
     </td>
 
+
+    <!-- Entregado por -->
 
     <td>
         {{ objeto.entregado_por }}
     </td>
 
 
+    <!-- Recibido por -->
+
     <td>
         {{ objeto.recibido_por }}
     </td>
 
+
+    <!-- Puesto -->
 
     <td>
         {{ objeto.puesto_recepcion }}
     </td>
 
 
-    <td>
-
-        {% if objeto.estado == "En custodia" %}
-
-            <span class="badge bg-warning text-dark">
-                En custodia
-            </span>
-
-        {% else %}
-
-            <span class="badge bg-success">
-                Entregado
-            </span>
-
-        {% endif %}
-
-    </td>
-
+    <!-- Observaciones -->
 
     <td>
-
-        {% if objeto.estado == "Entregado" %}
-
-            {{ objeto.entregado_a }}
-
+        {% if objeto.observaciones_recepcion %}
+            {{ objeto.observaciones_recepcion }}
         {% else %}
-
             -
-
         {% endif %}
+    </td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+    <td
+        colspan="10"
+        class="text-center"
+    >
+        No hay objetos actualmente en custodia.
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<!-- ========================================================== -->
+<!-- HISTORIAL DE OBJETOS ENTREGADOS -->
+<!-- ========================================================== -->
+
+<h4 class="mt-5">
+    📋 Historial de objetos entregados
+</h4>
+
+
+<div class="table-responsive">
+
+<table class="table table-striped table-bordered">
+
+<thead>
+
+<tr>
+
+    <th>Registro</th>
+
+    <th>Estado</th>
+
+    <th>Acción</th>
+
+    <th>Fecha recepción</th>
+
+    <th>Tipo</th>
+
+    <th>Descripción</th>
+
+    <th>Entregado por</th>
+
+    <th>Recibido por</th>
+
+    <th>Puesto</th>
+
+    <th>Observaciones</th>
+
+    <th>Entregado a</th>
+
+    <th>Entregado por guardia</th>
+
+    <th>Fecha de entrega</th>
+
+    <th>Observaciones de entrega</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+{% for objeto in objetos_entregados %}
+
+<tr>
+
+    <!-- Registro -->
+
+    <td>
+        <strong>
+            {{ objeto.numero_registro }}
+        </strong>
+    </td>
+
+
+    <!-- Estado -->
+
+    <td>
+
+        <span class="badge bg-success">
+            Entregado
+        </span>
 
     </td>
 
 
+    <!-- Acción -->
+
     <td>
 
-        {% if objeto.estado == "Entregado" %}
+        <span class="text-success">
+            ✓ Entregado
+        </span>
 
-            {{ objeto.entregado_por_guardia }}
+    </td>
 
+
+    <!-- Fecha recepción -->
+
+    <td>
+        {{ objeto.fecha_recepcion }}
+    </td>
+
+
+    <!-- Tipo -->
+
+    <td>
+        {{ objeto.tipo_objeto }}
+    </td>
+
+
+    <!-- Descripción -->
+
+    <td>
+        {{ objeto.descripcion }}
+    </td>
+
+
+    <!-- Entregado por -->
+
+    <td>
+        {{ objeto.entregado_por }}
+    </td>
+
+
+    <!-- Recibido por -->
+
+    <td>
+        {{ objeto.recibido_por }}
+    </td>
+
+
+    <!-- Puesto -->
+
+    <td>
+        {{ objeto.puesto_recepcion }}
+    </td>
+
+
+    <!-- Observaciones recepción -->
+
+    <td>
+
+        {% if objeto.observaciones_recepcion %}
+            {{ objeto.observaciones_recepcion }}
         {% else %}
-
             -
-
         {% endif %}
 
     </td>
 
 
+    <!-- Entregado a -->
+
+    <td>
+        {{ objeto.entregado_a }}
+    </td>
+
+
+    <!-- Guardia que entregó -->
+
+    <td>
+        {{ objeto.entregado_por_guardia }}
+    </td>
+
+
+    <!-- Fecha entrega -->
+
+    <td>
+        {{ objeto.fecha_entrega }}
+    </td>
+
+
+    <!-- Observaciones entrega -->
+
     <td>
 
-        {% if objeto.estado == "Entregado" %}
-
-            {{ objeto.fecha_entrega }}
-
+        {% if objeto.observaciones_entrega %}
+            {{ objeto.observaciones_entrega }}
         {% else %}
-
             -
-
-        {% endif %}
-
-    </td>
-
-
-    <td>
-
-        {% if objeto.estado == "En custodia" %}
-
-            <a
-                href="{{ url_for('entregar_objeto', id=objeto.id) }}"
-                class="btn btn-success btn-sm"
-            >
-                📤 Entregar
-            </a>
-
-        {% else %}
-
-            <span class="text-success">
-                ✓ Entregado
-            </span>
-
         {% endif %}
 
     </td>
@@ -375,10 +541,10 @@
 <tr>
 
     <td
-        colspan="12"
+        colspan="14"
         class="text-center"
     >
-        No hay objetos registrados.
+        No hay objetos entregados.
     </td>
 
 </tr>

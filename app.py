@@ -993,6 +993,7 @@ def eliminar_respaldo(nombre):
     "/objetos_custodia",
     methods=["GET", "POST"]
 )
+
 @login_required
 def objetos_custodia():
 
@@ -1068,6 +1069,7 @@ def objetos_custodia():
     ).strip()
 
     # ==============================
+    # CONSULTA GENERAL
     # TODOS PUEDEN VER LOS OBJETOS
     # ==============================
 
@@ -1108,6 +1110,14 @@ def objetos_custodia():
 
                 ObjetoCustodia.entregado_por_guardia.ilike(
                     f"%{busqueda}%"
+                ),
+
+                ObjetoCustodia.observaciones_recepcion.ilike(
+                    f"%{busqueda}%"
+                ),
+
+                ObjetoCustodia.observaciones_entrega.ilike(
+                    f"%{busqueda}%"
                 )
             )
         )
@@ -1124,9 +1134,26 @@ def objetos_custodia():
         .all()
     )
 
+    # ==============================
+    # SEPARAR POR ESTADO
+    # ==============================
+
+    objetos_custodia_actual = [
+        objeto
+        for objeto in datos
+        if objeto.estado == "En custodia"
+    ]
+
+    objetos_entregados = [
+        objeto
+        for objeto in datos
+        if objeto.estado == "Entregado"
+    ]
+
     return render_template(
         "objetos_custodia.html",
-        objetos=datos
+        objetos_custodia=objetos_custodia_actual,
+        objetos_entregados=objetos_entregados
     )
 
 @app.route(
