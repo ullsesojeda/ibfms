@@ -134,13 +134,200 @@
 </form></div>
 </div>
 
+<!-- ============================================== -->
+<!-- BÚSQUEDA Y FILTROS -->
+<!-- ============================================== -->
+
+<div class="card shadow mb-4">
+
+    <div class="card-body">
+
+        <h5 class="mb-3">
+            🔎 Buscar y filtrar visitantes
+        </h5>
+
+        <form method="GET">
+
+            <div class="row g-3">
+
+                <!-- BÚSQUEDA -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Buscar
+                    </label>
+
+                    <input
+                        type="text"
+                        name="buscar"
+                        class="form-control"
+                        placeholder="Nombre, ID, placas, vehículo..."
+                        value="{{ buscar or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- FECHA INICIAL -->
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+                        Fecha inicial
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_inicio"
+                        class="form-control"
+                        value="{{ fecha_inicio or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- FECHA FINAL -->
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+                        Fecha final
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_fin"
+                        class="form-control"
+                        value="{{ fecha_fin or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- PUESTO -->
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+                        Puesto
+                    </label>
+
+                    <select
+                        name="puesto_filtro"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option
+                            value="PUESTO 1"
+                            {% if puesto_filtro == "PUESTO 1" %}selected{% endif %}
+                        >
+                            PUESTO 1
+                        </option>
+
+                        <option
+                            value="PUESTO 2"
+                            {% if puesto_filtro == "PUESTO 2" %}selected{% endif %}
+                        >
+                            PUESTO 2
+                        </option>
+
+                        <option
+                            value="PUESTO 3"
+                            {% if puesto_filtro == "PUESTO 3" %}selected{% endif %}
+                        >
+                            PUESTO 3
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+                        Estado
+                    </label>
+
+                    <select
+                        name="estado_filtro"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option
+                            value="dentro"
+                            {% if estado_filtro == "dentro" %}selected{% endif %}
+                        >
+                            🟢 Dentro
+                        </option>
+
+                        <option
+                            value="salida"
+                            {% if estado_filtro == "salida" %}selected{% endif %}
+                        >
+                            ⚪ Ya salió
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="mt-3">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    🔎 Buscar
+                </button>
+
+                <a
+                    href="{{ url_for('visitantes') }}"
+                    class="btn btn-secondary"
+                >
+                    🔄 Limpiar filtros
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
 <div class="mb-3">
+
 <a
-    href="{{ url_for('exportar_visitantes') }}"
-    class="btn btn-primary"
+    href="{{ url_for(
+        'exportar_visitantes',
+        buscar=buscar,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        puesto_filtro=puesto_filtro,
+        estado_filtro=estado_filtro
+    ) }}"
+    class="btn btn-success"
 >
-Exportar a Excel
+    📊 Exportar a Excel
 </a>
+
 </div>
 
 <div class="table-responsive">
@@ -155,6 +342,7 @@ Exportar a Excel
 <tr>
     <th>Fecha</th>
     <th>Puesto</th>
+    <th>Acción</th>
     <th>Nombre</th>
     <th>ID</th>
     <th>Placas</th>
@@ -165,7 +353,6 @@ Exportar a Excel
     <th>Salida</th>
     <th>Guardia Entrada</th>
     <th>Guardia Salida</th>
-    <th>Acción</th>
 </tr>
 
 </thead>
@@ -177,7 +364,34 @@ Exportar a Excel
 <tr>
 
 <td>{{ v.fecha }}</td>
+
 <td>{{ v.puesto }}</td>
+
+<td>
+
+    {% if not v.salida %}
+
+    <a
+        href="{{ url_for('registrar_salida', id=v.id) }}"
+        class="btn btn-warning btn-sm"
+        onclick="return confirm('¿Registrar la salida de este visitante?')"
+    >
+        Salida
+    </a>
+
+    {% else %}
+
+    <button
+        class="btn btn-success btn-sm"
+        disabled
+    >
+        ✓ Salida registrada
+    </button>
+
+    {% endif %}
+
+</td>
+
 <td>{{ v.nombre }}</td>
 <td>{{ v.identificacion }}</td>
 <td>{{ v.placas }}</td>

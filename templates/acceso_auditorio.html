@@ -1,0 +1,878 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid mt-4">
+
+    <!-- ================================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================== -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="fw-bold">
+            🏛️ ACCESO AL AUDITORIO
+        </h2>
+
+        <p class="text-muted mb-0">
+            Registro y control de acceso al auditorio
+        </p>
+    </div>
+
+    <div>
+
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="btn btn-secondary"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Regresar al Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+    <!-- ================================================== -->
+    <!-- CONTADOR DE PERSONAS DENTRO -->
+    <!-- ================================================== -->
+
+    <div class="alert alert-info shadow-sm">
+
+        <div class="d-flex align-items-center">
+
+            <div class="fs-1 me-3">
+                🏛️
+            </div>
+
+            <div>
+
+                <div class="small text-muted">
+                    PERSONAS ACTUALMENTE EN EL AUDITORIO
+                </div>
+
+                <div class="fs-3 fw-bold">
+                    {{ personas_dentro }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- FORMULARIO DE REGISTRO -->
+    <!-- ================================================== -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header fw-bold">
+            Registrar acceso
+        </div>
+
+        <div class="card-body">
+
+            <form
+                method="POST"
+                action="{{ url_for('acceso_auditorio') }}"
+            >
+
+                <div class="row g-3">
+
+
+                    <!-- ====================================== -->
+                    <!-- QUIÉN ACCEDIÓ -->
+                    <!-- ====================================== -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label fw-bold">
+                            ¿Quién accedió?
+                        </label>
+
+                        <select
+                            name="quien_accedio"
+                            id="quien_accedio"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Seleccione...
+                            </option>
+
+                            {% for persona in personas_auditorio %}
+
+                                <option value="{{ persona }}">
+                                    {{ persona }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- NOMBRE OTRO -->
+                    <!-- ====================================== -->
+
+                    <div
+                        class="col-md-4"
+                        id="campo_nombre_otro"
+                        style="display:none;"
+                    >
+
+                        <label class="form-label fw-bold">
+                            Nombre
+                        </label>
+
+                        <input
+                            type="text"
+                            name="nombre_otro"
+                            id="nombre_otro"
+                            class="form-control"
+                            placeholder="Escriba el nombre"
+                        >
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- NÚMERO DE PERSONAS -->
+                    <!-- ====================================== -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label fw-bold">
+                            Número de personas
+                        </label>
+
+                        <input
+                            type="number"
+                            name="personas"
+                            class="form-control"
+                            min="1"
+                            value="1"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- MOTIVO -->
+                    <!-- ====================================== -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-bold">
+                            Motivo del acceso
+                        </label>
+
+                        <select
+                            name="motivo"
+                            id="motivo"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Seleccione...
+                            </option>
+
+                            {% for motivo_item in motivos_auditorio %}
+
+                                <option value="{{ motivo_item }}">
+                                    {{ motivo_item }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- MOTIVO OTRO -->
+                    <!-- ====================================== -->
+
+                    <div
+                        class="col-md-6"
+                        id="campo_motivo_otro"
+                        style="display:none;"
+                    >
+
+                        <label class="form-label fw-bold">
+                            Especifique el motivo
+                        </label>
+
+                        <input
+                            type="text"
+                            name="motivo_otro"
+                            id="motivo_otro"
+                            class="form-control"
+                            placeholder="Escriba el motivo"
+                        >
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- LUCES -->
+                    <!-- ====================================== -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-bold d-block">
+                            ¿Se encendieron las luces?
+                        </label>
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="luces"
+                                id="luces_si"
+                                value="SI"
+                                required
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="luces_si"
+                            >
+                                Sí
+                            </label>
+
+                        </div>
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="luces"
+                                id="luces_no"
+                                value="NO"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="luces_no"
+                            >
+                                No
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- INFORMACIÓN AUTOMÁTICA -->
+                    <!-- ====================================== -->
+
+                    <div class="col-md-6">
+
+                        <div class="alert alert-secondary mb-0">
+
+                            <strong>
+                                Fecha y hora de acceso:
+                            </strong>
+
+                            Se registrarán automáticamente al guardar.
+
+                            <br>
+
+                            <strong>
+                                Vigilante:
+                            </strong>
+
+                            {{ current_user.usuario }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ====================================== -->
+                    <!-- BOTÓN -->
+                    <!-- ====================================== -->
+
+                    <div class="col-12 text-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-lg"
+                        >
+                            🏛️ Registrar acceso
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+<!-- ================================================== -->
+<!-- BUSQUEDA Y FILTROS -->
+<!-- ================================================== -->
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header fw-bold">
+
+        🔎 Buscar y filtrar registros
+
+    </div>
+
+    <div class="card-body">
+
+        <form
+            method="GET"
+            action="{{ url_for('acceso_auditorio') }}"
+        >
+
+            <div class="row g-3">
+
+                <!-- BUSCAR -->
+                <div class="col-md-4">
+
+                    <label class="form-label fw-bold">
+                        Buscar persona
+                    </label>
+
+                    <input
+                        type="text"
+                        name="buscar"
+                        class="form-control"
+                        placeholder="Nombre o persona..."
+                        value="{{ buscar }}"
+                    >
+
+                </div>
+
+
+                <!-- FECHA INICIAL -->
+                <div class="col-md-2">
+
+                    <label class="form-label fw-bold">
+                        Fecha inicial
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_inicio"
+                        class="form-control"
+                        value="{{ fecha_inicio }}"
+                    >
+
+                </div>
+
+
+                <!-- FECHA FINAL -->
+                <div class="col-md-2">
+
+                    <label class="form-label fw-bold">
+                        Fecha final
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_fin"
+                        class="form-control"
+                        value="{{ fecha_fin }}"
+                    >
+
+                </div>
+
+
+                <!-- MOTIVO -->
+                <div class="col-md-2">
+
+                    <label class="form-label fw-bold">
+                        Motivo
+                    </label>
+
+                    <select
+                        name="motivo_filtro"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        {% for motivo_item in motivos_auditorio %}
+
+                            <option
+                                value="{{ motivo_item }}"
+                                {% if motivo_filtro == motivo_item %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ motivo_item }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- ESTADO -->
+                <div class="col-md-2">
+
+                    <label class="form-label fw-bold">
+                        Estado
+                    </label>
+
+                    <select
+                        name="estado_filtro"
+                        class="form-select"
+                    >
+
+                        <option
+                            value=""
+                            {% if estado_filtro == "" %}
+                                selected
+                            {% endif %}
+                        >
+                            Todos
+                        </option>
+
+                        <option
+                            value="dentro"
+                            {% if estado_filtro == "dentro" %}
+                                selected
+                            {% endif %}
+                        >
+                            🟢 Dentro
+                        </option>
+
+                        <option
+                            value="salida"
+                            {% if estado_filtro == "salida" %}
+                                selected
+                            {% endif %}
+                        >
+                            ⚪ Salida registrada
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- BOTONES -->
+                <div class="col-12">
+
+             <button
+    type="submit"
+    class="btn btn-primary"
+>
+    🔎 Buscar
+</button>
+
+<a
+    href="{{ url_for('acceso_auditorio') }}"
+    class="btn btn-secondary"
+>
+    🔄 Limpiar filtros
+</a>
+
+<a
+    href="{{ url_for(
+        'exportar_acceso_auditorio',
+        buscar=buscar,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        motivo_filtro=motivo_filtro,
+        estado_filtro=estado_filtro
+    ) }}"
+    class="btn btn-success"
+>
+    📊 Exportar a Excel
+</a>       
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+    <!-- ================================================== -->
+    <!-- TABLA DE REGISTROS -->
+    <!-- ================================================== -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header fw-bold">
+            Registros de acceso al auditorio
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table
+                    class="table table-striped table-bordered table-hover align-middle"
+                >
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>Fecha</th>
+                            <th>Acceso</th>
+                            <th>Quién accedió</th>
+                            <th>Personas</th>
+                            <th>Motivo</th>
+                            <th>Luces</th>
+                            <th>Salida</th>
+                            <th>Estado</th>
+                            <th>Guardia</th>
+                            <th>Acción</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for registro in registros %}
+
+                        <tr>
+
+                            <!-- FECHA -->
+                            <td>
+                                {{ registro.fecha }}
+                            </td>
+
+
+                            <!-- HORA ACCESO -->
+                            <td>
+                                {{ registro.hora_acceso }}
+                            </td>
+
+
+                            <!-- QUIÉN -->
+                            <td>
+
+                                {% if registro.quien_accedio == "OTRO" %}
+
+                                    {{ registro.nombre_otro }}
+
+                                    <br>
+
+                                    <small class="text-muted">
+                                        (OTRO)
+                                    </small>
+
+                                {% else %}
+
+                                    {{ registro.quien_accedio }}
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- PERSONAS -->
+                            <td class="text-center">
+
+                                <strong>
+                                    {{ registro.personas }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- MOTIVO -->
+                            <td>
+
+                                {% if registro.motivo == "OTRO" %}
+
+                                    {{ registro.motivo_otro }}
+
+                                    <br>
+
+                                    <small class="text-muted">
+                                        (OTRO)
+                                    </small>
+
+                                {% else %}
+
+                                    {{ registro.motivo }}
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- LUCES -->
+                            <td class="text-center">
+
+                                {% if registro.luces == "SI" %}
+
+                                    <span class="badge bg-warning text-dark">
+                                        SÍ
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+                                        NO
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- SALIDA -->
+                            <td>
+
+                                {% if registro.hora_salida %}
+
+                                    {{ registro.hora_salida }}
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ESTADO -->
+                            <td>
+
+                                {% if registro.hora_salida %}
+
+                                    <span class="badge bg-secondary">
+                                        SALIDA REGISTRADA
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-success">
+                                        DENTRO DEL AUDITORIO
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- GUARDIA -->
+                            <td>
+                                {{ registro.guardia }}
+                            </td>
+
+
+                            <!-- ACCIÓN -->
+                            <td class="text-center">
+
+                                {% if not registro.hora_salida %}
+
+                                    <a
+                                        href="{{ url_for(
+                                            'registrar_salida_auditorio',
+                                            id=registro.id
+                                        ) }}"
+                                        class="btn btn-danger btn-sm"
+                                        onclick="return confirm(
+                                            '¿Desea registrar la salida de este acceso?'
+                                        );"
+                                    >
+                                        🚪 Registrar salida
+                                    </a>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+
+                            <td
+                                colspan="10"
+                                class="text-center text-muted py-4"
+                            >
+
+                                No hay registros de acceso al auditorio.
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ====================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ====================================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const quienAccedio =
+            document.getElementById(
+                "quien_accedio"
+            );
+
+        const campoNombreOtro =
+            document.getElementById(
+                "campo_nombre_otro"
+            );
+
+        const nombreOtro =
+            document.getElementById(
+                "nombre_otro"
+            );
+
+
+        const motivo =
+            document.getElementById(
+                "motivo"
+            );
+
+        const campoMotivoOtro =
+            document.getElementById(
+                "campo_motivo_otro"
+            );
+
+        const motivoOtro =
+            document.getElementById(
+                "motivo_otro"
+            );
+
+
+        // ==============================================
+        // PERSONA = OTRO
+        // ==============================================
+
+        function revisarPersona() {
+
+            if (
+                quienAccedio.value === "OTRO"
+            ) {
+
+                campoNombreOtro.style.display =
+                    "block";
+
+                nombreOtro.required =
+                    true;
+
+            } else {
+
+                campoNombreOtro.style.display =
+                    "none";
+
+                nombreOtro.required =
+                    false;
+
+                nombreOtro.value =
+                    "";
+
+            }
+
+        }
+
+
+        // ==============================================
+        // MOTIVO = OTRO
+        // ==============================================
+
+        function revisarMotivo() {
+
+            if (
+                motivo.value === "OTRO"
+            ) {
+
+                campoMotivoOtro.style.display =
+                    "block";
+
+                motivoOtro.required =
+                    true;
+
+            } else {
+
+                campoMotivoOtro.style.display =
+                    "none";
+
+                motivoOtro.required =
+                    false;
+
+                motivoOtro.value =
+                    "";
+
+            }
+
+        }
+
+
+        quienAccedio.addEventListener(
+            "change",
+            revisarPersona
+        );
+
+
+        motivo.addEventListener(
+            "change",
+            revisarMotivo
+        );
+
+
+        revisarPersona();
+        revisarMotivo();
+
+    }
+);
+
+</script>
+
+{% endblock %}

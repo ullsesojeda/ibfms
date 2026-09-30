@@ -265,3 +265,62 @@ class ObjetoCustodia(db.Model):
     observaciones_entrega = db.Column(
         db.Text
     )    
+ # ==========================================================
+# ACCESO AL AUDITORIO
+# ==========================================================
+
+class AccesoAuditorio(db.Model):
+    __tablename__ = "accesos_auditorio"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    fecha = db.Column(
+        db.String(20),
+        nullable=False
+    )
+
+    hora_acceso = db.Column(
+        db.String(10),
+        nullable=False
+    )
+
+    quien_accedio = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    nombre_otro = db.Column(
+        db.String(150)
+    )
+
+    personas = db.Column(
+        db.Integer,
+        nullable=False,
+        default=1
+    )
+
+    motivo = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    motivo_otro = db.Column(
+        db.String(200)
+    )
+
+    luces = db.Column(
+        db.String(10),
+        nullable=False
+    )
+
+    hora_salida = db.Column(
+        db.String(10)
+    )
+
+    guardia = db.Column(
+        db.String(100),
+        nullable=False
+    )   

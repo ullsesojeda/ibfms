@@ -101,6 +101,12 @@
         📦 Objetos en Custodia
     </a>
 
+    <a href="{{ url_for('acceso_auditorio') }}"
+        class="{% if request.endpoint=='acceso_auditorio' %}active{% endif %}">
+        <i class="bi bi-building"></i>
+         Acceso al Auditorio
+    </a>
+
 
 
     {% if current_user.rol == "admin" %}

@@ -6,8 +6,13 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash
+    flash,
+    send_file
 )
+
+from io import BytesIO
+
+from openpyxl import Workbook
 
 from flask_login import (
     LoginManager,
@@ -33,7 +38,8 @@ from models import (
     RegistroVIP,
     Empleado,
     ControlVehiculo,
-    ObjetoCustodia
+    ObjetoCustodia,
+    AccesoAuditorio
 )
 
 from datetime import datetime
@@ -285,42 +291,333 @@ def registrar_salida(id):
         url_for("visitantes")
     )
 
-@app.route(
-    "/exportar_visitantes"
-)
+@app.route("/exportar_visitantes")
 @login_required
 def exportar_visitantes():
 
-    datos = Visitante.query.all()
+    # ==============================================
+    # OBTENER FILTROS
+    # ==============================================
 
-    lista = []
+    buscar = request.args.get(
+        "buscar",
+        ""
+    ).strip()
 
-    for v in datos:
-        lista.append({
-            "Fecha": v.fecha,
-            "Nombre": v.nombre,
-            "Identificación": v.identificacion,
-            "Placas": v.placas,
-            "Vehículo": v.vehiculo,
-            "Visita": v.visita,
-            "Motivo": v.motivo,
-            "Entrada": v.entrada,
-            "Salida": v.salida,
-            "Guardia": v.guardia
-        })
+    fecha_inicio = request.args.get(
+        "fecha_inicio",
+        ""
+    ).strip()
 
-    df = pd.DataFrame(lista)
+    fecha_fin = request.args.get(
+        "fecha_fin",
+        ""
+    ).strip()
 
-    archivo = "visitantes.xlsx"
+    puesto_filtro = request.args.get(
+        "puesto_filtro",
+        ""
+    ).strip()
 
-    df.to_excel(
-        archivo,
-        index=False
+    estado_filtro = request.args.get(
+        "estado_filtro",
+        ""
+    ).strip()
+
+
+    # ==============================================
+    # CONSULTA BASE
+    # ==============================================
+
+    if current_user.rol == "admin":
+
+        consulta = Visitante.query
+
+    else:
+
+        consulta = (
+            Visitante.query
+            .filter_by(
+                guardia=current_user.usuario
+            )
+        )
+
+
+    # ==============================================
+    # BÚSQUEDA
+    # ==============================================
+
+    if buscar:
+
+        texto = f"%{buscar}%"
+
+        consulta = consulta.filter(
+            db.or_(
+                Visitante.nombre.ilike(texto),
+                Visitante.identificacion.ilike(texto),
+                Visitante.placas.ilike(texto),
+                Visitante.vehiculo.ilike(texto),
+                Visitante.visita.ilike(texto),
+                Visitante.motivo.ilike(texto)
+            )
+        )
+
+
+    # ==============================================
+    # FILTRO POR PUESTO
+    # ==============================================
+
+    if puesto_filtro:
+
+        consulta = consulta.filter(
+            Visitante.puesto == puesto_filtro
+        )
+
+
+    # ==============================================
+    # FILTRO POR ESTADO
+    # ==============================================
+
+    if estado_filtro == "dentro":
+
+        consulta = consulta.filter(
+            Visitante.salida.is_(None)
+        )
+
+    elif estado_filtro == "salida":
+
+        consulta = consulta.filter(
+            Visitante.salida.isnot(None)
+        )
+
+
+    # ==============================================
+    # OBTENER REGISTROS
+    # ==============================================
+
+    datos = consulta.all()
+
+
+    # ==============================================
+    # FILTRO POR FECHAS
+    # ==============================================
+
+    if fecha_inicio or fecha_fin:
+
+        registros_filtrados = []
+
+        fecha_inicio_obj = None
+        fecha_fin_obj = None
+
+
+        if fecha_inicio:
+
+            try:
+
+                fecha_inicio_obj = datetime.strptime(
+                    fecha_inicio,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha inicial no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("visitantes")
+                )
+
+
+        if fecha_fin:
+
+            try:
+
+                fecha_fin_obj = datetime.strptime(
+                    fecha_fin,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha final no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("visitantes")
+                )
+
+
+        for registro in datos:
+
+            try:
+
+                fecha_registro = datetime.strptime(
+                    registro.fecha,
+                    "%d/%m/%Y"
+                ).date()
+
+            except (ValueError, TypeError):
+
+                continue
+
+
+            if (
+                fecha_inicio_obj
+                and fecha_registro < fecha_inicio_obj
+            ):
+
+                continue
+
+
+            if (
+                fecha_fin_obj
+                and fecha_registro > fecha_fin_obj
+            ):
+
+                continue
+
+
+            registros_filtrados.append(
+                registro
+            )
+
+
+        datos = registros_filtrados
+
+
+    # ==============================================
+    # CREAR EXCEL
+    # ==============================================
+
+    from openpyxl import Workbook
+
+    from openpyxl.styles import Font
+
+    from io import BytesIO
+
+    from flask import send_file
+
+
+    libro = Workbook()
+
+    hoja = libro.active
+
+    hoja.title = "Visitantes"
+
+
+    encabezados = [
+        "ID",
+        "Fecha",
+        "Puesto",
+        "Nombre",
+        "Identificación",
+        "Placas",
+        "Vehículo",
+        "Visita",
+        "Motivo",
+        "Entrada",
+        "Salida",
+        "Guardia Entrada",
+        "Guardia Salida"
+    ]
+
+
+    hoja.append(encabezados)
+
+
+    # Encabezados en negritas
+
+    for celda in hoja[1]:
+
+        celda.font = Font(
+            bold=True
+        )
+
+
+    # ==============================================
+    # AGREGAR REGISTROS
+    # ==============================================
+
+    for visitante in datos:
+
+        hoja.append([
+            visitante.id,
+            visitante.fecha,
+            visitante.puesto,
+            visitante.nombre,
+            visitante.identificacion,
+            visitante.placas,
+            visitante.vehiculo,
+            visitante.visita,
+            visitante.motivo,
+            visitante.entrada,
+            visitante.salida or "",
+            visitante.guardia,
+            visitante.guardia_salida or ""
+        ])
+
+
+    # ==============================================
+    # AJUSTAR COLUMNAS
+    # ==============================================
+
+    anchos = {
+        "A": 8,
+        "B": 12,
+        "C": 15,
+        "D": 25,
+        "E": 18,
+        "F": 15,
+        "G": 18,
+        "H": 25,
+        "I": 25,
+        "J": 12,
+        "K": 12,
+        "L": 18,
+        "M": 18
+    }
+
+
+    for columna, ancho in anchos.items():
+
+        hoja.column_dimensions[
+            columna
+        ].width = ancho
+
+
+    # ==============================================
+    # FILTRO AUTOMÁTICO DE EXCEL
+    # ==============================================
+
+    hoja.auto_filter.ref = (
+        hoja.dimensions
     )
+
+
+    # ==============================================
+    # PREPARAR ARCHIVO
+    # ==============================================
+
+    archivo = BytesIO()
+
+    libro.save(archivo)
+
+    archivo.seek(0)
+
 
     return send_file(
         archivo,
-        as_attachment=True
+        as_attachment=True,
+        download_name="reporte_visitantes.xlsx",
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument"
+            ".spreadsheetml.sheet"
+        )
     )
 
 @app.route("/", methods=["GET", "POST"])
@@ -459,26 +756,40 @@ def cambiar_password():
 @login_required
 def visitantes():
 
+    # ==============================================
+    # REGISTRAR VISITANTE
+    # ==============================================
+
     if request.method == "POST":
 
         nuevo = Visitante(
             fecha=datetime.now().strftime(
                 "%d/%m/%Y"
             ),
+
             nombre=request.form["nombre"],
+
             identificacion=request.form["identificacion"],
+
             placas=request.form["placas"],
+
             vehiculo=request.form["vehiculo"],
+
             visita=request.form["visita"],
+
             motivo=request.form["motivo"],
+
             puesto=request.form["puesto"],
+
             entrada=datetime.now().strftime(
                 "%H:%M:%S"
             ),
+
             guardia=current_user.usuario
         )
 
         db.session.add(nuevo)
+
         db.session.commit()
 
         flash(
@@ -490,29 +801,257 @@ def visitantes():
             url_for("visitantes")
         )
 
+
+    # ==============================================
+    # OBTENER FILTROS
+    # ==============================================
+
+    buscar = request.args.get(
+        "buscar",
+        ""
+    ).strip()
+
+    fecha_inicio = request.args.get(
+        "fecha_inicio",
+        ""
+    ).strip()
+
+    fecha_fin = request.args.get(
+        "fecha_fin",
+        ""
+    ).strip()
+
+    puesto_filtro = request.args.get(
+        "puesto_filtro",
+        ""
+    ).strip()
+
+    estado_filtro = request.args.get(
+        "estado_filtro",
+        ""
+    ).strip()
+
+
+    # ==============================================
+    # CONSULTA BASE
+    # ==============================================
+
     if current_user.rol == "admin":
-   
-        datos = (
-        Visitante.query
-        .order_by(Visitante.id.desc())
-        .all()
-    )
+
+        consulta = Visitante.query
+
     else:
-         datos = (
-        Visitante.query
-        .filter_by(
-            guardia=current_user.usuario
+
+        consulta = (
+            Visitante.query
+            .filter_by(
+                guardia=current_user.usuario
+            )
         )
-        .order_by(Visitante.id.desc())
-        .all()
+
+
+    # ==============================================
+    # BÚSQUEDA GENERAL
+    # ==============================================
+
+    if buscar:
+
+        texto = f"%{buscar}%"
+
+        consulta = consulta.filter(
+            db.or_(
+                Visitante.nombre.ilike(texto),
+                Visitante.identificacion.ilike(texto),
+                Visitante.placas.ilike(texto),
+                Visitante.vehiculo.ilike(texto),
+                Visitante.visita.ilike(texto),
+                Visitante.motivo.ilike(texto)
+            )
+        )
+
+
+    # ==============================================
+    # FILTRO POR PUESTO
+    # ==============================================
+
+    if puesto_filtro:
+
+        consulta = consulta.filter(
+            Visitante.puesto == puesto_filtro
+        )
+
+
+    # ==============================================
+    # FILTRO POR ESTADO
+    # ==============================================
+
+    if estado_filtro == "dentro":
+
+        consulta = consulta.filter(
+            Visitante.salida.is_(None)
+        )
+
+    elif estado_filtro == "salida":
+
+        consulta = consulta.filter(
+            Visitante.salida.isnot(None)
+        )
+
+
+    # ==============================================
+    # OBTENER REGISTROS
+    # ==============================================
+
+    datos = consulta.all()
+
+
+    # ==============================================
+    # FILTRO POR FECHAS
+    #
+    # La fecha se guarda como DD/MM/YYYY,
+    # por eso se convierte antes de comparar.
+    # ==============================================
+
+    if fecha_inicio or fecha_fin:
+
+        registros_filtrados = []
+
+        fecha_inicio_obj = None
+        fecha_fin_obj = None
+
+
+        # ------------------------------------------
+        # FECHA INICIAL
+        # ------------------------------------------
+
+        if fecha_inicio:
+
+            try:
+
+                fecha_inicio_obj = datetime.strptime(
+                    fecha_inicio,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha inicial no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("visitantes")
+                )
+
+
+        # ------------------------------------------
+        # FECHA FINAL
+        # ------------------------------------------
+
+        if fecha_fin:
+
+            try:
+
+                fecha_fin_obj = datetime.strptime(
+                    fecha_fin,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha final no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("visitantes")
+                )
+
+
+        # ------------------------------------------
+        # REVISAR REGISTROS
+        # ------------------------------------------
+
+        for registro in datos:
+
+            try:
+
+                fecha_registro = datetime.strptime(
+                    registro.fecha,
+                    "%d/%m/%Y"
+                ).date()
+
+            except (ValueError, TypeError):
+
+                continue
+
+
+            if (
+                fecha_inicio_obj
+                and fecha_registro < fecha_inicio_obj
+            ):
+
+                continue
+
+
+            if (
+                fecha_fin_obj
+                and fecha_registro > fecha_fin_obj
+            ):
+
+                continue
+
+
+            registros_filtrados.append(
+                registro
+            )
+
+
+        datos = registros_filtrados
+
+
+    # ==============================================
+    # ORDEN
+    # ==============================================
+    #
+    # PRIMERO:
+    # visitantes que todavía están dentro.
+    #
+    # DESPUÉS:
+    # visitantes que ya salieron.
+    #
+    # Dentro de cada grupo:
+    # registro más reciente primero.
+    # ==============================================
+
+    datos.sort(
+        key=lambda visitante: (
+            visitante.salida is not None,
+            -visitante.id
+        )
     )
+
+
+    # ==============================================
+    # MOSTRAR PÁGINA
+    # ==============================================
 
     return render_template(
         "visitantes.html",
-        visitantes=datos
+        visitantes=datos,
+
+        buscar=buscar,
+
+        fecha_inicio=fecha_inicio,
+
+        fecha_fin=fecha_fin,
+
+        puesto_filtro=puesto_filtro,
+
+        estado_filtro=estado_filtro
     )
-
-
 @app.route(
     "/incidentes",
     methods=["GET", "POST"]
@@ -691,6 +1230,823 @@ def registrar_salida_empleado(id):
 
     return redirect(
         url_for("empleados")
+    )
+
+# ==========================================================
+# ACCESO AL AUDITORIO
+# ==========================================================
+
+PERSONAS_AUDITORIO = [
+    "CHAVEZ",
+    "JABES",
+    "PASTOR LUPE",
+    "JOSUE ARANDA",
+    "JOSUE ORTEGA",
+    "CHEQUE",
+    "PASTOR FLORENCIO",
+    "PAEZ",
+    "HNA ELIZABETH",
+    "HNA SAMANTA",
+    "HNA GABRIELA",
+    "PASTOR AVILA",
+    "A1",
+    "CORA",
+    "VIP",
+    "OTRO"
+]
+
+MOTIVOS_AUDITORIO = [
+    "PIANO",
+    "ENSAYO",
+    "ENSAYO AUDIO",
+    "TRABAJO",
+    "LIMPIEZA",
+    "CAMARAS",
+    "ORACION",
+    "OFICINA",
+    "OTRO"
+]
+
+
+@app.route(
+    "/acceso_auditorio",
+    methods=["GET", "POST"]
+)
+@login_required
+def acceso_auditorio():
+
+    if request.method == "POST":
+
+        quien_accedio = request.form.get(
+            "quien_accedio",
+            ""
+        ).strip()
+
+        nombre_otro = request.form.get(
+            "nombre_otro",
+            ""
+        ).strip()
+
+        personas = request.form.get(
+            "personas",
+            "1"
+        ).strip()
+
+        motivo = request.form.get(
+            "motivo",
+            ""
+        ).strip()
+
+        motivo_otro = request.form.get(
+            "motivo_otro",
+            ""
+        ).strip()
+
+        luces = request.form.get(
+            "luces",
+            ""
+        ).strip()
+
+        # ==============================================
+        # VALIDACIONES
+        # ==============================================
+
+        if not quien_accedio:
+            flash(
+                "Seleccione quién accedió al auditorio.",
+                "danger"
+            )
+            return redirect(
+                url_for("acceso_auditorio")
+            )
+
+        if quien_accedio == "OTRO" and not nombre_otro:
+            flash(
+                "Escriba el nombre de la persona.",
+                "danger"
+            )
+            return redirect(
+                url_for("acceso_auditorio")
+            )
+
+        try:
+            personas = int(personas)
+        except ValueError:
+            flash(
+                "El número de personas no es válido.",
+                "danger"
+            )
+            return redirect(
+                url_for("acceso_auditorio")
+            )
+
+        if personas < 1:
+            flash(
+                "Debe registrar al menos una persona.",
+                "danger"
+            )
+            return redirect(
+                url_for("acceso_auditorio")
+            )
+
+        if not motivo:
+            flash(
+                "Seleccione el motivo del acceso.",
+                "danger"
+            )
+            return redirect(
+                url_for("acceso_auditorio")
+            )
+
+        if motivo == "OTRO" and not motivo_otro:
+            flash(
+                "Escriba el motivo.",
+                "danger"
+            )
+            return redirect(
+                url_for("acceso_auditorio")
+            )
+
+        if luces not in ["SI", "NO"]:
+            flash(
+                "Indique si se encendieron las luces.",
+                "danger"
+            )
+            return redirect(
+                url_for("acceso_auditorio")
+            )
+
+        # ==============================================
+        # CREAR REGISTRO
+        # ==============================================
+
+        nuevo = AccesoAuditorio(
+            fecha=datetime.now().strftime(
+                "%d/%m/%Y"
+            ),
+
+            hora_acceso=datetime.now().strftime(
+                "%H:%M:%S"
+            ),
+
+            quien_accedio=quien_accedio,
+
+            nombre_otro=(
+                nombre_otro
+                if quien_accedio == "OTRO"
+                else None
+            ),
+
+            personas=personas,
+
+            motivo=motivo,
+
+            motivo_otro=(
+                motivo_otro
+                if motivo == "OTRO"
+                else None
+            ),
+
+            luces=luces,
+
+            hora_salida=None,
+
+            guardia=current_user.usuario
+        )
+
+        db.session.add(nuevo)
+        db.session.commit()
+
+        flash(
+            "Acceso al auditorio registrado correctamente.",
+            "success"
+        )
+
+        return redirect(
+            url_for("acceso_auditorio")
+        )
+    # ==============================================
+    # FILTROS
+    # ==============================================
+
+    buscar = request.args.get(
+        "buscar",
+        ""
+    ).strip()
+
+    fecha_inicio = request.args.get(
+        "fecha_inicio",
+        ""
+    ).strip()
+
+    fecha_fin = request.args.get(
+        "fecha_fin",
+        ""
+    ).strip()
+
+    motivo_filtro = request.args.get(
+        "motivo_filtro",
+        ""
+    ).strip()
+
+    estado_filtro = request.args.get(
+        "estado_filtro",
+        ""
+    ).strip()
+
+
+    # ==============================================
+    # CONSULTA BASE
+    # ==============================================
+
+    consulta = AccesoAuditorio.query
+
+
+    # ==============================================
+    # BÚSQUEDA POR PERSONA
+    # ==============================================
+
+    if buscar:
+
+        consulta = consulta.filter(
+            db.or_(
+                AccesoAuditorio.quien_accedio.ilike(
+                    f"%{buscar}%"
+                ),
+                AccesoAuditorio.nombre_otro.ilike(
+                    f"%{buscar}%"
+                )
+            )
+        )
+
+
+        # ==============================================
+    # FILTRO POR MOTIVO
+    # ==============================================
+
+    if motivo_filtro:
+
+        consulta = consulta.filter(
+            AccesoAuditorio.motivo == motivo_filtro
+        )
+
+
+    # ==============================================
+    # FILTRO POR ESTADO
+    # ==============================================
+
+    if estado_filtro == "dentro":
+
+        consulta = consulta.filter(
+            AccesoAuditorio.hora_salida.is_(None)
+        )
+
+    elif estado_filtro == "salida":
+
+        consulta = consulta.filter(
+            AccesoAuditorio.hora_salida.isnot(None)
+        )
+
+
+    # ==============================================
+    # OBTENER REGISTROS
+    # ==============================================
+
+    registros = consulta.all()
+
+
+    # ==============================================
+    # FILTRO POR FECHAS
+    # ==============================================
+
+    if fecha_inicio or fecha_fin:
+
+        registros_filtrados = []
+
+        fecha_inicio_obj = None
+        fecha_fin_obj = None
+
+
+        # ------------------------------------------
+        # FECHA INICIAL
+        # ------------------------------------------
+
+        if fecha_inicio:
+
+            try:
+
+                fecha_inicio_obj = datetime.strptime(
+                    fecha_inicio,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha inicial no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("acceso_auditorio")
+                )
+
+
+        # ------------------------------------------
+        # FECHA FINAL
+        # ------------------------------------------
+
+        if fecha_fin:
+
+            try:
+
+                fecha_fin_obj = datetime.strptime(
+                    fecha_fin,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha final no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("acceso_auditorio")
+                )
+
+
+        # ------------------------------------------
+        # REVISAR CADA REGISTRO
+        # ------------------------------------------
+
+        for registro in registros:
+
+            try:
+
+                fecha_registro = datetime.strptime(
+                    registro.fecha,
+                    "%d/%m/%Y"
+                ).date()
+
+            except (ValueError, TypeError):
+
+                continue
+
+
+            # --------------------------------------
+            # FECHA INICIAL
+            # --------------------------------------
+
+            if (
+                fecha_inicio_obj
+                and fecha_registro < fecha_inicio_obj
+            ):
+
+                continue
+
+
+            # --------------------------------------
+            # FECHA FINAL
+            # --------------------------------------
+
+            if (
+                fecha_fin_obj
+                and fecha_registro > fecha_fin_obj
+            ):
+
+                continue
+
+
+            registros_filtrados.append(
+                registro
+            )
+
+
+        registros = registros_filtrados
+
+
+    # ==============================================
+    # ORDEN DE LOS REGISTROS
+    # ==============================================
+
+    registros.sort(
+        key=lambda registro: (
+            registro.hora_salida is not None,
+            -registro.id
+        )
+    )
+
+
+    # ==============================================
+    # PERSONAS ACTUALMENTE DENTRO
+    # ==============================================
+
+    personas_dentro = sum(
+        registro.personas
+        for registro in registros
+        if registro.hora_salida is None
+    )
+
+
+    # ==============================================
+    # MOSTRAR PÁGINA
+    # ==============================================
+
+    return render_template(
+        "acceso_auditorio.html",
+        registros=registros,
+        personas_dentro=personas_dentro,
+        personas_auditorio=PERSONAS_AUDITORIO,
+        motivos_auditorio=MOTIVOS_AUDITORIO,
+        buscar=buscar,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        motivo_filtro=motivo_filtro,
+        estado_filtro=estado_filtro
+    )
+
+@app.route(
+    "/exportar_acceso_auditorio"
+)
+@login_required
+def exportar_acceso_auditorio():
+
+    # ==============================================
+    # RECIBIR FILTROS
+    # ==============================================
+
+    buscar = request.args.get(
+        "buscar",
+        ""
+    ).strip()
+
+    fecha_inicio = request.args.get(
+        "fecha_inicio",
+        ""
+    ).strip()
+
+    fecha_fin = request.args.get(
+        "fecha_fin",
+        ""
+    ).strip()
+
+    motivo_filtro = request.args.get(
+        "motivo_filtro",
+        ""
+    ).strip()
+
+    estado_filtro = request.args.get(
+        "estado_filtro",
+        ""
+    ).strip()
+
+
+    # ==============================================
+    # CONSULTA BASE
+    # ==============================================
+
+    consulta = AccesoAuditorio.query
+
+
+    # ==============================================
+    # BÚSQUEDA POR PERSONA
+    # ==============================================
+
+    if buscar:
+
+        consulta = consulta.filter(
+            db.or_(
+                AccesoAuditorio.quien_accedio.ilike(
+                    f"%{buscar}%"
+                ),
+                AccesoAuditorio.nombre_otro.ilike(
+                    f"%{buscar}%"
+                )
+            )
+        )
+
+
+    # ==============================================
+    # FILTRO POR MOTIVO
+    # ==============================================
+
+    if motivo_filtro:
+
+        consulta = consulta.filter(
+            AccesoAuditorio.motivo == motivo_filtro
+        )
+
+
+    # ==============================================
+    # FILTRO POR ESTADO
+    # ==============================================
+
+    if estado_filtro == "dentro":
+
+        consulta = consulta.filter(
+            AccesoAuditorio.hora_salida.is_(None)
+        )
+
+    elif estado_filtro == "salida":
+
+        consulta = consulta.filter(
+            AccesoAuditorio.hora_salida.isnot(None)
+        )
+
+
+    # ==============================================
+    # OBTENER REGISTROS
+    # ==============================================
+
+    registros = consulta.all()
+
+
+    # ==============================================
+    # FILTRO POR FECHAS
+    # ==============================================
+
+    if fecha_inicio or fecha_fin:
+
+        registros_filtrados = []
+
+        fecha_inicio_obj = None
+        fecha_fin_obj = None
+
+
+        if fecha_inicio:
+
+            try:
+
+                fecha_inicio_obj = datetime.strptime(
+                    fecha_inicio,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha inicial no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("acceso_auditorio")
+                )
+
+
+        if fecha_fin:
+
+            try:
+
+                fecha_fin_obj = datetime.strptime(
+                    fecha_fin,
+                    "%Y-%m-%d"
+                ).date()
+
+            except ValueError:
+
+                flash(
+                    "La fecha final no es válida.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("acceso_auditorio")
+                )
+
+
+        for registro in registros:
+
+            try:
+
+                fecha_registro = datetime.strptime(
+                    registro.fecha,
+                    "%d/%m/%Y"
+                ).date()
+
+            except (ValueError, TypeError):
+
+                continue
+
+
+            if (
+                fecha_inicio_obj
+                and fecha_registro < fecha_inicio_obj
+            ):
+
+                continue
+
+
+            if (
+                fecha_fin_obj
+                and fecha_registro > fecha_fin_obj
+            ):
+
+                continue
+
+
+            registros_filtrados.append(
+                registro
+            )
+
+
+        registros = registros_filtrados
+
+
+    # ==============================================
+    # ORDENAR
+    # ==============================================
+
+    registros.sort(
+        key=lambda registro: (
+            registro.hora_salida is not None,
+            -registro.id
+        )
+    )
+
+
+    # ==============================================
+    # CREAR ARCHIVO EXCEL
+    # ==============================================
+
+    wb = Workbook()
+
+    ws = wb.active
+
+    ws.title = "Acceso Auditorio"
+
+
+    # ==============================================
+    # ENCABEZADO
+    # ==============================================
+
+    ws["A1"] = "REPORTE DE ACCESO AL AUDITORIO"
+
+    ws["A2"] = (
+        "Generado el: "
+        + datetime.now().strftime(
+            "%d/%m/%Y %H:%M:%S"
+        )
+    )
+
+
+    # ==============================================
+    # COLUMNAS
+    # ==============================================
+
+    encabezados = [
+        "ID",
+        "Fecha",
+        "Hora acceso",
+        "Quién accedió",
+        "Nombre",
+        "Personas",
+        "Motivo",
+        "Motivo otro",
+        "Luces",
+        "Hora salida",
+        "Estado",
+        "Guardia"
+    ]
+
+    ws.append([])
+
+    ws.append(encabezados)
+
+
+    # ==============================================
+    # REGISTROS
+    # ==============================================
+
+    for registro in registros:
+
+        nombre = (
+            registro.nombre_otro
+            if registro.quien_accedio == "OTRO"
+            else ""
+        )
+
+        estado = (
+            "DENTRO DEL AUDITORIO"
+            if not registro.hora_salida
+            else "SALIDA REGISTRADA"
+        )
+
+        ws.append([
+            registro.id,
+            registro.fecha,
+            registro.hora_acceso,
+            registro.quien_accedio,
+            nombre,
+            registro.personas,
+            registro.motivo,
+            registro.motivo_otro or "",
+            registro.luces,
+            registro.hora_salida or "",
+            estado,
+            registro.guardia
+        ])
+
+
+    # ==============================================
+    # ANCHO DE COLUMNAS
+    # ==============================================
+
+    anchos = {
+        "A": 8,
+        "B": 14,
+        "C": 14,
+        "D": 22,
+        "E": 25,
+        "F": 12,
+        "G": 20,
+        "H": 25,
+        "I": 12,
+        "J": 14,
+        "K": 25,
+        "L": 20
+    }
+
+    for columna, ancho in anchos.items():
+
+        ws.column_dimensions[
+            columna
+        ].width = ancho
+
+
+    # ==============================================
+    # ARCHIVO EN MEMORIA
+    # ==============================================
+
+    archivo = BytesIO()
+
+    wb.save(archivo)
+
+    archivo.seek(0)
+
+
+    # ==============================================
+    # DESCARGAR
+    # ==============================================
+
+    return send_file(
+        archivo,
+        as_attachment=True,
+        download_name=(
+            "reporte_acceso_auditorio.xlsx"
+        ),
+        mimetype=(
+            "application/vnd.openxmlformats-"
+            "officedocument.spreadsheetml.sheet"
+        )
+    )
+
+@app.route(
+    "/registrar_salida_auditorio/<int:id>"
+)
+@login_required
+def registrar_salida_auditorio(id):
+
+    registro = (
+        AccesoAuditorio.query
+        .get_or_404(id)
+    )
+    
+    # ==============================================
+    # EVITAR REGISTRAR SALIDA DOS VECES
+    # ==============================================
+
+    if registro.hora_salida:
+        flash(
+            "La salida de este registro ya fue realizada.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("acceso_auditorio")
+        )
+
+    # ==============================================
+    # REGISTRAR HORA DE SALIDA
+    # ==============================================
+
+    registro.hora_salida = (
+        datetime.now().strftime(
+            "%H:%M:%S"
+        )
+    )
+
+    db.session.commit()
+
+    flash(
+        "Salida del auditorio registrada correctamente.",
+        "success"
+    )
+
+    return redirect(
+        url_for("acceso_auditorio")
     )
 
 @app.route(
