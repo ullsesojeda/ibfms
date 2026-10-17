@@ -813,3 +813,43 @@ h1,h2,h3,h4,h5{
     z-index: 10;
 
 }
+
+/* ==========================================
+   BARRA HORIZONTAL SUPERIOR PARA LAS TABLAS
+========================================== */
+
+.barra-scroll-superior {
+    width: 100%;
+    height: 18px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-bottom: 5px;
+    cursor: ew-resize;
+    -webkit-overflow-scrolling: touch;
+}
+
+.barra-scroll-interior {
+    height: 1px;
+    min-width: 100%;
+}
+
+/* DataTables controla su propio desplazamiento horizontal */
+.table-responsive.contenedor-datatables {
+    overflow-x: visible;
+}
+
+/* Mantener la barra visible y usable en modo oscuro */
+.dark-mode .barra-scroll-superior {
+    scrollbar-color: #9ca3af #334155;
+}
+
+/* En pantallas táctiles se conserva el desplazamiento */
+.barra-scroll-superior,
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ajuste temporal para identificar barras duplicadas */
+.dataTables_scroll > .barra-scroll-superior ~ .barra-scroll-superior {
+    display: none !important;
+}

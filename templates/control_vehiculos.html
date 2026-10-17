@@ -157,6 +157,132 @@ Regresar al Dashboard
 
 </div>
 
+<!-- BÚSQUEDA Y FILTROS -->
+<div class="card shadow mb-4">
+    <div class="card-header bg-dark text-white">
+        <strong>Buscar movimientos de vehículos</strong>
+    </div>
+
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('control_vehiculos') }}">
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Chofer</label>
+                    <input
+                        type="text"
+                        name="chofer"
+                        class="form-control"
+                        placeholder="Nombre del chofer"
+                        value="{{ buscar_chofer }}"
+                    >
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Vehículo</label>
+                    <input
+                        type="text"
+                        name="vehiculo"
+                        class="form-control"
+                        placeholder="Nombre del vehículo"
+                        value="{{ buscar_vehiculo }}"
+                    >
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Movimiento</label>
+                    <select name="movimiento" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Entrada"
+                            {% if buscar_movimiento == "Entrada" %}selected{% endif %}>
+                            Entrada
+                        </option>
+                        <option value="Salida"
+                            {% if buscar_movimiento == "Salida" %}selected{% endif %}>
+                            Salida
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Puesto</label>
+                    <select name="puesto" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="PUESTO 1"
+                            {% if buscar_puesto == "PUESTO 1" %}selected{% endif %}>
+                            PUESTO 1
+                        </option>
+                        <option value="PUESTO 2"
+                            {% if buscar_puesto == "PUESTO 2" %}selected{% endif %}>
+                            PUESTO 2
+                        </option>
+                        <option value="PUESTO 3"
+                            {% if buscar_puesto == "PUESTO 3" %}selected{% endif %}>
+                            PUESTO 3
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Fecha inicial</label>
+                    <input
+                        type="date"
+                        name="fecha_inicio"
+                        class="form-control"
+                        value="{{ fecha_inicio }}"
+                    >
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Fecha final</label>
+                    <input
+                        type="date"
+                        name="fecha_fin"
+                        class="form-control"
+                        value="{{ fecha_fin }}"
+                    >
+                </div>
+
+                <div class="col-md-12 d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Buscar
+                    </button>
+
+                    <a
+                        href="{{ url_for('control_vehiculos') }}"
+                        class="btn btn-secondary">
+                        Limpiar filtros
+                    </a>
+
+                    <a
+                        href="{{ url_for(
+                            'control_vehiculos',
+                            exportar='excel',
+                            chofer=buscar_chofer,
+                            vehiculo=buscar_vehiculo,
+                            fecha_inicio=fecha_inicio,
+                            fecha_fin=fecha_fin,
+                            movimiento=buscar_movimiento,
+                            puesto=buscar_puesto
+                        ) }}"
+                        class="btn btn-success">
+                        Exportar resultados a Excel
+                    </a>
+                </div>
+
+            </div>
+        </form>
+
+        <hr>
+
+        <p class="mb-0">
+            <strong>Registros encontrados:</strong>
+            {{ movimientos|length }}
+        </p>
+    </div>
+</div>
+
+
 <div class="table-responsive">
 
 <table

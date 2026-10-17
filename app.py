@@ -2084,17 +2084,18 @@ def registro_vip():
         "registro_vip.html"
     )
 
+
 @app.route("/control_vehiculos", methods=["GET", "POST"])
 @login_required
 def control_vehiculos():
 
+    # Registrar movimiento
     if request.method == "POST":
 
         fecha = datetime.now().strftime("%d/%m/%Y")
         hora = datetime.now().strftime("%H:%M:%S")
 
         nuevo = ControlVehiculo(
-
             fecha=fecha,
             hora=hora,
             chofer=request.form["chofer"],
@@ -2102,7 +2103,6 @@ def control_vehiculos():
             movimiento=request.form["movimiento"],
             puesto=request.form["puesto"],
             guardia=current_user.usuario
-
         )
 
         db.session.add(nuevo)
@@ -2113,17 +2113,128 @@ def control_vehiculos():
             "success"
         )
 
-        return redirect(
-            url_for("control_vehiculos")
-        )
+        return redirect(url_for("control_vehiculos"))
 
-    movimientos = ControlVehiculo.query.order_by(
+    # Leer filtros
+    buscar_chofer = request.args.get("chofer", "").strip()
+    buscar_vehiculo = request.args.get("vehiculo", "").strip()
+    fecha_inicio = request.args.get("fecha_inicio", "").strip()
+    fecha_fin = request.args.get("fecha_fin", "").strip()
+    buscar_movimiento = request.args.get("movimiento", "").strip()
+    buscar_puesto = request.args.get("puesto", "").strip()
+
+    # Obtener registros, más recientes primero
+    todos = ControlVehiculo.query.order_by(
         ControlVehiculo.id.desc()
     ).all()
 
+    movimientos = []
+
+    # Aplicar filtros
+    for m in todos:
+
+        if buscar_chofer and buscar_chofer.lower() not in (m.chofer or "").lower():
+            continue
+
+        if buscar_vehiculo and buscar_vehiculo.lower() not in (m.vehiculo or "").lower():
+            continue
+
+        if buscar_movimiento and m.movimiento != buscar_movimiento:
+            continue
+
+        if buscar_puesto and m.puesto != buscar_puesto:
+            continue
+
+        # Las fechas guardadas tienen formato DD/MM/AAAA
+        try:
+            fecha_registro = datetime.strptime(
+                m.fecha, "%d/%m/%Y"
+            ).date()
+        except (ValueError, TypeError):
+            fecha_registro = None
+
+        if fecha_inicio:
+            inicio = datetime.strptime(
+                fecha_inicio, "%Y-%m-%d"
+            ).date()
+
+            if fecha_registro is None or fecha_registro < inicio:
+                continue
+
+        if fecha_fin:
+            fin = datetime.strptime(
+                fecha_fin, "%Y-%m-%d"
+            ).date()
+
+            if fecha_registro is None or fecha_registro > fin:
+                continue
+
+        movimientos.append(m)
+
+    # Exportar únicamente los resultados filtrados
+    if request.args.get("exportar") == "excel":
+
+        libro = Workbook()
+        hoja = libro.active
+        hoja.title = "Control de Vehículos"
+
+        hoja.append([
+            "Fecha",
+            "Hora",
+            "Chofer",
+            "Vehículo",
+            "Movimiento",
+            "Puesto",
+            "Guardia"
+        ])
+
+        for m in movimientos:
+            hoja.append([
+                m.fecha,
+                m.hora,
+                m.chofer,
+                m.vehiculo,
+                m.movimiento,
+                m.puesto,
+                m.guardia
+            ])
+
+        hoja.freeze_panes = "A2"
+        hoja.auto_filter.ref = hoja.dimensions
+
+        for columna in hoja.columns:
+            letra = columna[0].column_letter
+            ancho = max(
+                len(str(celda.value or ""))
+                for celda in columna
+            )
+            hoja.column_dimensions[letra].width = min(
+                ancho + 2, 35
+            )
+
+        archivo = BytesIO()
+        libro.save(archivo)
+        archivo.seek(0)
+
+        return send_file(
+            archivo,
+            as_attachment=True,
+            download_name="control_vehiculos.xlsx",
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            )
+        )
+
     return render_template(
         "control_vehiculos.html",
-        movimientos=movimientos
+        movimientos=movimientos,
+        buscar_chofer=buscar_chofer,
+        buscar_vehiculo=buscar_vehiculo,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        buscar_movimiento=buscar_movimiento,
+        buscar_puesto=buscar_puesto
     )
 
 @app.route("/historial_vip")
