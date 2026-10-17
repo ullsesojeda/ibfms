@@ -1,4 +1,3 @@
-
 $(document).ready(function () {
 
     // =====================================================
@@ -13,17 +12,24 @@ $(document).ready(function () {
     // ORDEN CRONOLÓGICO DE FECHAS DD/MM/AAAA
     // =====================================================
 
+    function textoPlano(valor) {
+        return $("<div>")
+            .html(String(valor == null ? "" : valor))
+            .text()
+            .trim();
+    }
+
     function convertirFecha(valor) {
-        if (!valor) return "";
+        const texto = textoPlano(valor);
+        const coincidencia = texto.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+        );
 
-        const texto = $("<div>").html(String(valor)).text().trim();
-        const partes = texto.split("/");
+        if (!coincidencia) return 0;
 
-        if (partes.length !== 3) return "";
-
-        const dia = parseInt(partes[0], 10);
-        const mes = parseInt(partes[1], 10);
-        const anio = parseInt(partes[2], 10);
+        const dia = parseInt(coincidencia[1], 10);
+        const mes = parseInt(coincidencia[2], 10);
+        const anio = parseInt(coincidencia[3], 10);
 
         if (
             !Number.isInteger(dia) ||
@@ -33,31 +39,17 @@ $(document).ready(function () {
             mes < 1 || mes > 12 ||
             anio < 1
         ) {
-            return "";
+            return 0;
         }
 
-        return String(anio).padStart(4, "0") +
-               String(mes).padStart(2, "0") +
-               String(dia).padStart(2, "0");
+        // Número AAAAMMDD para ordenar cronológicamente.
+        return anio * 10000 + mes * 100 + dia;
     }
 
-    // Tipo personalizado para ordenar fechas
+    // Tipo personalizado para DataTables 1.13.x.
     $.fn.dataTable.ext.type.order["fecha-es-pre"] = function (valor) {
-        return convertirFecha(valor) || "00000000";
+        return convertirFecha(valor);
     };
-
-    // Detectar fechas en encabezados que se llamen Fecha
-    $.fn.dataTable.ext.type.detect.unshift(function (valor) {
-        if (typeof valor !== "string") return null;
-
-        const texto = $("<div>").html(valor).text().trim();
-
-        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(texto)) {
-            return convertirFecha(texto) ? "fecha-es" : null;
-        }
-
-        return null;
-    });
 
     // =====================================================
     // TABLAS CON DATATABLES
@@ -79,7 +71,6 @@ $(document).ready(function () {
     // =====================================================
 
     function instalarBarraSuperior(zona) {
-
         if (!zona) return;
 
         const cuerpo = zona.querySelector(".dataTables_scrollBody");
@@ -100,7 +91,6 @@ $(document).ready(function () {
         );
 
         if (!barra) {
-
             barra = document.createElement("div");
             barra.className = "barra-scroll-superior";
 
@@ -132,7 +122,6 @@ $(document).ready(function () {
         const interior = barra.firstElementChild;
 
         function actualizar() {
-
             interior.style.width = cuerpo.scrollWidth + "px";
 
             barra.style.display =
@@ -144,13 +133,11 @@ $(document).ready(function () {
         }
 
         actualizar();
-
         if (barra._observador) {
             barra._observador.disconnect();
         }
 
         if ("ResizeObserver" in window) {
-
             barra._observador = new ResizeObserver(actualizar);
             barra._observador.observe(cuerpo);
 
@@ -165,7 +152,6 @@ $(document).ready(function () {
     // =====================================================
 
     tablas.forEach(function (selector) {
-
         const tabla = $(selector);
 
         if (!tabla.length) return;
@@ -174,8 +160,55 @@ $(document).ready(function () {
             return;
         }
 
-        tabla.DataTable({
+        // Identificar las columnas cuyo encabezado sea "Fecha".
+        const encabezados = tabla.find("thead th").toArray();
 
+        const columnasFecha = [];
+
+        encabezados.forEach(function (th, indice) {
+            const titulo = $(th).text().trim().toLowerCase();
+
+            if (titulo === "fecha") {
+                columnasFecha.push(indice);
+            }
+        });
+
+        // Identificar una columna ID, si existe.
+        let columnaId = -1;
+
+        encabezados.forEach(function (th, indice) {
+            const titulo = $(th).text().trim().toLowerCase();
+
+            if (
+                titulo === "id" ||
+                titulo === "n.º" ||
+                titulo === "número"
+            ) {
+                columnaId = indice;
+            }
+        });
+
+        // Forzar el tipo fecha-es en todas las columnas Fecha.
+        const definicionesColumnas = columnasFecha.map(function (indice) {
+            return {
+                targets: indice,
+                type: "fecha-es"
+            };
+        });
+
+        // Mostrar primero la fecha más reciente.
+        // Si hay ID, usarlo como segundo criterio descendente.
+        const ordenInicial = [];
+
+        if (columnasFecha.length > 0) {
+            ordenInicial.push([columnasFecha[0], "desc"]);
+
+            if (columnaId >= 0 && columnaId !== columnasFecha[0]) {
+                ordenInicial.push([columnaId, "desc"]);
+            }
+        }
+
+        tabla.DataTable({
             responsive: false,
             scrollX: true,
             autoWidth: false,
@@ -189,37 +222,39 @@ $(document).ready(function () {
 
             language: idiomaEspanol,
 
+            // Aplicar el orden inicial solo cuando hay columna Fecha.
+            order: ordenInicial,
+
+            // Asignación explícita del tipo personalizado.
+            columnDefs: definicionesColumnas,
+
             initComplete: function () {
+                const api = this.api();
+                const contenedor = api.table().container();
 
-    const api = this.api();
-    const contenedor = api.table().container();
+                const envoltura = contenedor.closest(".table-responsive");
 
-    const envoltura = contenedor.closest(".table-responsive");
-
-    if (envoltura) {
-        envoltura.dataset.scrollManaged = "true";
-    }
-
-    instalarBarraSuperior(
-        contenedor.querySelector(".dataTables_scroll")
-    );
-
-    api.columns.adjust();
-},
-            drawCallback: function () {
+                if (envoltura) {
+                    envoltura.dataset.scrollManaged = "true";
+                }
 
                 instalarBarraSuperior(
-                    this.api()
-                        .table()
-                        .container()
-                        .querySelector(".dataTables_scroll")
+                    contenedor.querySelector(".dataTables_scroll")
+                );
+
+                api.columns.adjust();
+            },
+
+            drawCallback: function () {
+                const contenedor = this.api().table().container();
+
+                instalarBarraSuperior(
+                    contenedor.querySelector(".dataTables_scroll")
                 );
             }
         });
-
-    });
-
-    // =====================================================
+    }); 
+        // =====================================================
     // TABLAS NORMALES, SIN DATATABLES
     // =====================================================
 
@@ -262,7 +297,6 @@ $(document).ready(function () {
             let sincronizando = false;
 
             barra.addEventListener("scroll", function () {
-
                 if (sincronizando) return;
 
                 sincronizando = true;
@@ -271,7 +305,6 @@ $(document).ready(function () {
             });
 
             contenedor.addEventListener("scroll", function () {
-
                 if (sincronizando) return;
 
                 sincronizando = true;
@@ -280,7 +313,6 @@ $(document).ready(function () {
             });
 
             function actualizar() {
-
                 interior.style.width = tabla.scrollWidth + "px";
 
                 barra.style.display =
@@ -294,7 +326,6 @@ $(document).ready(function () {
             actualizar();
 
             if ("ResizeObserver" in window) {
-
                 const observador = new ResizeObserver(actualizar);
 
                 observador.observe(contenedor);
@@ -303,4 +334,4 @@ $(document).ready(function () {
         }
     );
 
-});
+});      
