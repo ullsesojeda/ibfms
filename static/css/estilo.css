@@ -755,64 +755,65 @@ h1,h2,h3,h4,h5{
 .table td{
     vertical-align: middle;
 }
-/* ==========================================
-   TABLA DE VISITANTES CON COLUMNAS FIJAS
-========================================== */
 
-#tablaVisitantes{
+/* ==========================================================
+   TABLA VISITANTES - COLUMNAS FIJAS
+   ========================================================== */
+
+#tablaVisitantes {
     border-collapse: separate;
     border-spacing: 0;
 }
 
+/* Evitar que el contenido se divida en varias líneas */
 #tablaVisitantes th,
-#tablaVisitantes td{
+#tablaVisitantes td {
     white-space: nowrap;
     background-color: var(--bs-body-bg);
 }
 
-/* FECHA */
-
+/* COLUMNA 1: FECHA */
 #tablaVisitantes th:nth-child(1),
-#tablaVisitantes td:nth-child(1){
-
+#tablaVisitantes td:nth-child(1) {
     position: sticky;
     left: 0;
-    z-index: 5;
     min-width: 120px;
-
+    z-index: 5;
 }
 
-/* NOMBRE */
-
+/* COLUMNA 2: PUESTO */
 #tablaVisitantes th:nth-child(2),
-#tablaVisitantes td:nth-child(2){
-
+#tablaVisitantes td:nth-child(2) {
     position: sticky;
     left: 120px;
+    min-width: 120px;
     z-index: 5;
-    min-width: 220px;
-
 }
 
-/* ACCIONES */
-
-#tablaVisitantes th:last-child,
-#tablaVisitantes td:last-child{
-
+/* COLUMNA 3: ACCIÓN - BOTÓN SALIDA */
+#tablaVisitantes th:nth-child(3),
+#tablaVisitantes td:nth-child(3) {
     position: sticky;
-    right: 0;
+    left: 240px;
+    min-width: 130px;
     z-index: 5;
-    min-width: 150px;
-
 }
 
-/* ENCABEZADOS */
-
-#tablaVisitantes thead th{
-
+/* ENCABEZADOS POR ENCIMA DE LAS CELDAS */
+#tablaVisitantes thead th {
     z-index: 10;
-
 }
+
+/* FONDO DE LAS COLUMNAS FIJAS */
+#tablaVisitantes th:nth-child(1),
+#tablaVisitantes td:nth-child(1),
+#tablaVisitantes th:nth-child(2),
+#tablaVisitantes td:nth-child(2),
+#tablaVisitantes th:nth-child(3),
+#tablaVisitantes td:nth-child(3) {
+    background-color: var(--bs-body-bg);
+}
+
 
 /* ==========================================
    BARRA HORIZONTAL SUPERIOR PARA LAS TABLAS
