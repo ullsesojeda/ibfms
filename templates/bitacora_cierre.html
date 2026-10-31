@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<h2>Revisar y cerrar Bitácora</h2>
+<p>{{ servicio.puesto }} · {{ servicio.turno }} · {{ servicio.fecha.strftime('%d/%m/%Y') }} · {{ servicio.guardia }}</p>
+<div class="alert alert-info">{% for estado,n in resumen.items() %}{{ estado }}: <strong>{{ n }}</strong> · {% endfor %}</div>
+{% if resumen['Pendiente'] %}<div class="alert alert-warning">Quedan actividades pendientes. Explica el motivo para poder cerrar. Las pendientes conservarán su estado.</div>{% endif %}
+<ul>{% for t in servicio.tareas if t.estado!='Realizada' %}<li><strong>{{ t.estado }}</strong> · {{ t.horario }} · {{ t.actividad }}{% if t.nota %}<br>{{ t.nota }}{% endif %}</li>{% endfor %}</ul>
+<p>Al confirmar, esta bitácora quedará disponible para consulta y no podrá modificarse.</p>
+<form method="POST"><input type="hidden" name="csrf_token" value="{{ bitacora_token() }}"><label for="nota-cierre">Observaciones de cierre{% if resumen['Pendiente'] %} (obligatorias){% endif %}</label><textarea id="nota-cierre" name="nota_cierre" rows="4" class="form-control mb-3" {% if resumen['Pendiente'] %}required{% endif %}></textarea><button class="btn btn-dark">Confirmar cierre</button><a class="btn btn-secondary" href="{{ url_for('bitacora.detalle',ident=servicio.id) }}">Volver sin cerrar</a></form>
+{% endblock %}

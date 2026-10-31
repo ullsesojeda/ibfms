@@ -2,7 +2,7 @@
 
 {% block contenido %}
 
-<h3>Bitácora de Turno</h3>
+<h3>Cambio de Turno</h3>
 
 <form method="POST">
 
@@ -55,11 +55,13 @@
 
 <tr>
 
-    <th>Fecha</th>
+    <th>ID</th>
+<th>Fecha</th>
+    <th>Guardia</th>
     <th>Turno</th>
     <th>Asunto</th>
     <th>Descripción</th>
-    <th>Guardia</th>
+    <th>Observaciones de recepción</th>
     <th>Estado</th>
     <th style="width:150px;">Acción</th>
 
@@ -73,11 +75,13 @@
 
 <tr>
 
-    <td>{{ b.fecha }}</td>
+    <td>{{ b.id }}</td>
+<td>{{ b.fecha }}</td>
+    <td>{{ b.guardia }}</td>
     <td>{{ b.turno }}</td>
     <td>{{ b.asunto }}</td>
-    <td>{{ b.descripcion }}</td>
-    <td>{{ b.guardia }}</td>
+    <td style="white-space: pre-wrap;">{{ b.descripcion }}</td>
+    <td style="white-space: pre-wrap;">{{ b.observaciones_recepcion or "—" }}</td>
 
     <td>
 

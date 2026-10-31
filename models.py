@@ -84,6 +84,8 @@ class BitacoraTurno(db.Model):
         default=False
     )
 
+    observaciones_recepcion = db.Column(db.Text)
+
     recibido_por = db.Column(
         db.String(50)
     )
@@ -167,6 +169,9 @@ class ControlVehiculo(db.Model):
         db.Integer,
         primary_key=True
     )
+
+    nota = db.Column(db.Text)
+    salida_sin_entrada = db.Column(db.Boolean, default=False)
 
     fecha = db.Column(
         db.String(20)

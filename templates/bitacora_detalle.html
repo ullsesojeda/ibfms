@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<h2>Bitácora · {{ servicio.puesto }} · {{ servicio.turno }}</h2>
+<p><strong>Fecha de inicio:</strong> {{ servicio.fecha.strftime('%d/%m/%Y') }} · <strong>Guardia:</strong> {{ servicio.guardia }} · <strong>Estado:</strong> {{ 'Cerrada' if servicio.cierre else 'Abierta' }}</p>
+<p class="text-muted">Horas de operación: Ciudad de México. La hora de captura se guarda al pulsar Guardar; no acredita por sí sola la hora de ejecución. Las tareas de jornada se confirman al cierre.</p>
+<div class="alert alert-info">{% for estado,n in resumen.items() %}<span class="me-3">{{ estado }}: <strong>{{ n }}</strong></span>{% endfor %}</div>
+{% if servicio.motivo_culto %}<p><strong>Ajuste de culto:</strong> {{ servicio.motivo_culto }}</p>{% endif %}
+{% if servicio.cierre %}<p><strong>Cierre:</strong> {{ servicio.cierre.strftime('%d/%m/%Y %H:%M:%S') }}</p><p style="white-space:pre-wrap">{{ servicio.nota_cierre or 'Sin observaciones de cierre.' }}</p>{% endif %}
+<div class="d-flex flex-wrap gap-2 mb-3"><a class="btn btn-secondary" href="{{ url_for('bitacora.index') }}">Volver</a><a class="btn btn-outline-primary" href="{{ url_for('bitacora_turno') }}" target="_blank" rel="noopener">Cambio de Turno</a><a class="btn btn-outline-danger" href="{{ url_for('incidentes') }}" target="_blank" rel="noopener">Registrar incidencia</a><a class="btn btn-outline-secondary" href="{{ url_for('control_vehiculos') }}" target="_blank" rel="noopener">Vehículos</a>{% if editable %}<a class="btn btn-dark" href="{{ url_for('bitacora.cerrar',ident=servicio.id) }}">Revisar y cerrar servicio</a>{% endif %}</div>
+{% for t in servicio.tareas %}
+<article id="tarea-{{ t.id }}" class="card mb-3"><div class="card-body">
+<div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ loop.index }}. {{ t.horario }} · {{ t.seccion }}</strong><span class="badge {{ 'bg-success' if t.estado=='Realizada' else 'bg-danger' if t.estado=='No realizada' else 'bg-secondary' if t.estado=='No aplica' else 'bg-warning text-dark' }}">{{ t.estado }}</span></div>
+<p class="mt-2">{{ t.actividad }}</p><small class="text-muted">Límite previsto: {{ t.limite.strftime('%d/%m/%Y %H:%M') }}{% if t.captura %} · Captura: {{ t.captura.strftime('%d/%m/%Y %H:%M:%S') }}{% if t.captura>t.limite %} · Registrada después del horario{% endif %}{% elif (servicio.cierre or ahora)>t.limite %} · Sin registrar al finalizar el horario{% endif %}</small>
+{% if t.referencia %}<p class="mt-2"><a target="_blank" rel="noopener" href="{{ url_for(referencias_bitacora[t.referencia][1]) }}">Abrir {{ referencias_bitacora[t.referencia][2] }}</a></p>{% endif %}
+{% if editable %}
+<form method="POST" action="{{ url_for('bitacora.tarea',ident=servicio.id,tarea_id=t.id) }}" class="mt-3">
+<input type="hidden" name="csrf_token" value="{{ bitacora_token() }}"><input type="hidden" name="version" value="{{ t.version }}">
+<div class="row g-2"><div class="col-md-3"><label for="estado-{{ t.id }}">Estado</label><select id="estado-{{ t.id }}" name="estado" class="form-select">{% for e in estados_bitacora %}<option {% if t.estado==e %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+<div class="col-md-7"><label for="nota-{{ t.id }}">Observaciones / motivo (obligatorio si no se realizó o no aplica)</label><textarea id="nota-{{ t.id }}" name="nota" class="form-control" rows="2">{{ t.nota or '' }}</textarea></div><div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary">Guardar</button></div></div>
+</form>
+{% elif t.nota %}<p class="mt-2" style="white-space:pre-wrap">{{ t.nota }}</p>{% endif %}
+</div></article>{% endfor %}
+<section id="anotaciones" class="card mb-3"><div class="card-body"><h4>Anotaciones y movimientos adicionales</h4>
+{% for a in servicio.anotaciones %}<div class="border-bottom mb-3"><small>{{ a.fecha.strftime('%d/%m/%Y %H:%M:%S') }} · {{ a.guardia }}</small><p style="white-space:pre-wrap">{{ a.texto }}</p>{% if a.referencia %}<p><a href="{{ url_for('bitacora.referencia',ident=servicio.id,anotacion_id=a.id) }}">{{ referencias_bitacora[a.referencia][2] }} #{{ a.registro_id }}</a></p>{% endif %}</div>{% else %}<p>Sin anotaciones adicionales.</p>{% endfor %}
+{% if editable %}<form method="POST" action="{{ url_for('bitacora.anotacion',ident=servicio.id) }}"><input type="hidden" name="csrf_token" value="{{ bitacora_token() }}"><label for="texto-adicional">Nueva anotación</label><textarea id="texto-adicional" name="texto" rows="3" class="form-control mb-2" required></textarea>
+<details><summary>Enlazar un registro de otro módulo (opcional)</summary><p>Abre el módulo, guarda el registro y coloca aquí su número. La lista diaria solo confirma la tarea; no crea una entrega, incidencia o movimiento de vehículo.</p><label for="modulo-ref">Módulo</label><select id="modulo-ref" class="form-select mb-2" name="referencia"><option value="">Sin referencia</option>{% for clave,datos in referencias_bitacora.items() %}<option value="{{ clave }}">{{ datos[2] }}</option>{% endfor %}</select><label for="id-ref">Número de registro</label><input id="id-ref" name="registro_id" type="number" min="1" class="form-control mb-2"></details><button class="btn btn-primary mt-2">Agregar anotación</button></form>{% endif %}
+</div></section>
+<details class="mb-4"><summary>Historial de cambios</summary><ul class="list-group mt-2">{% for e in servicio.eventos %}<li class="list-group-item"><small>{{ e.fecha.strftime('%d/%m/%Y %H:%M:%S') }} · {{ e.guardia }}</small><p class="mb-0" style="white-space:pre-wrap">{{ e.detalle }}</p></li>{% endfor %}</ul></details>
+<script>document.querySelectorAll('select[name="estado"]').forEach(function(s){function actualizar(){s.form.querySelector('textarea[name="nota"]').required=['No realizada','No aplica'].includes(s.value);}s.addEventListener('change',actualizar);actualizar();});</script>
+{% endblock %}

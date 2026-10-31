@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<h2>{{ referencias_bitacora[anotacion.referencia][2] }} #{{ anotacion.registro_id }}</h2>
+<dl class="row">{% for campo in ['fecha','guardia','turno','asunto','descripcion','recibido_por','observaciones_recepcion','tipo','hora','chofer','vehiculo','movimiento','puesto','nota'] %}{% if registro|attr(campo) is defined %}<dt class="col-md-3">{{ campo|replace('_',' ')|capitalize }}</dt><dd class="col-md-9" style="white-space:pre-wrap">{{ registro|attr(campo) or '—' }}</dd>{% endif %}{% endfor %}</dl>
+<a class="btn btn-secondary" href="{{ url_for('bitacora.detalle',ident=ident) }}">Volver a Bitácora</a>
+{% endblock %}

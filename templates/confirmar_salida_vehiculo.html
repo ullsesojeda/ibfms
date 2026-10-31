@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<h2>Salida sin entrada registrada</h2>
+<div class="alert alert-warning">No hay una entrada pendiente para este vehículo. Para registrar la salida, escribe una nota explicando lo ocurrido.</div>
+<p><strong>Vehículo:</strong> {{ valores.vehiculo }} · <strong>Chofer:</strong> {{ valores.chofer }} · <strong>Puesto:</strong> {{ puesto }}</p>
+<form method="POST" action="{{ url_for('control_vehiculos') }}">
+    <input type="hidden" name="chofer" value="{{ valores.chofer }}">
+    <input type="hidden" name="vehiculo" value="{{ valores.vehiculo }}">
+    <input type="hidden" name="movimiento" value="{{ movimiento }}">
+    <input type="hidden" name="puesto" value="{{ puesto }}">
+    <label for="nota" class="form-label">Nota obligatoria</label>
+    <textarea id="nota" name="nota" class="form-control mb-3" rows="4" required></textarea>
+    <button type="submit" class="btn btn-warning">Registrar salida con nota</button>
+    <a href="{{ url_for('control_vehiculos') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

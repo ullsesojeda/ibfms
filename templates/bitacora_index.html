@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<h2>Bitácora</h2>
+<p class="text-muted">Lista de servicio por puesto y turno, anotaciones y revisión de pendientes.</p>
+<div class="card mb-4"><div class="card-body">
+<h4>Iniciar servicio</h4>
+<form method="POST" class="row g-3">
+<input type="hidden" name="csrf_token" value="{{ bitacora_token() }}">
+<div class="col-md-3"><label for="fecha-servicio">Fecha de inicio del turno</label><input id="fecha-servicio" class="form-control" type="date" name="fecha" value="{{ fecha_default }}" required></div>
+<div class="col-md-3"><label for="puesto-servicio">Puesto</label><select id="puesto-servicio" class="form-select" name="puesto" required><option value="">Selecciona…</option>{% for n in [1,2,3] %}<option>PUESTO {{ n }}</option>{% endfor %}</select></div>
+<div class="col-md-3"><label for="turno-servicio">Turno</label><select id="turno-servicio" name="turno" class="form-select">{% for t in ['Día','Noche'] %}<option {% if turno_default==t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+<div class="col-md-3"><label>Guardia</label><p class="form-control">{{ current_user.usuario }}</p></div>
+<div class="col-12"><label><input id="culto-servicio" type="checkbox" name="culto" value="1" {% if fecha_default.weekday() in [2,3] and turno_default=='Día' %}checked{% endif %}> Incluir actividades de culto (solo turno de día)</label>
+<p class="text-muted mb-1">Se proponen miércoles y jueves. Explica cualquier cambio para un día con o sin culto.</p>
+<input aria-label="Motivo del cambio de culto" class="form-control" name="motivo_culto" placeholder="Motivo del ajuste de culto, si corresponde"></div>
+<div><button class="btn btn-primary">Iniciar bitácora</button></div>
+</form>
+</div></div>
+<h4>{{ 'Supervisión de servicios' if current_user.rol=='admin' else 'Mis servicios' }}</h4>
+<form method="GET" class="row g-2 mb-3">
+<div class="col-md-3"><label for="f-fecha">Fecha de inicio</label><input id="f-fecha" class="form-control" type="date" name="fecha" value="{{ request.args.get('fecha','') }}"></div>
+<div class="col-md-3"><label for="f-puesto">Puesto</label><select id="f-puesto" class="form-select" name="puesto"><option value="">Todos</option>{% for n in [1,2,3] %}{% set puesto='PUESTO '~n %}<option {% if request.args.get('puesto')==puesto %}selected{% endif %}>{{ puesto }}</option>{% endfor %}</select></div>
+<div class="col-md-2"><label for="f-turno">Turno</label><select id="f-turno" class="form-select" name="turno"><option value="">Todos</option>{% for t in ['Día','Noche'] %}<option {% if request.args.get('turno')==t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+{% if current_user.rol=='admin' %}<div class="col-md-2"><label for="f-guardia">Guardia</label><input id="f-guardia" class="form-control" name="guardia" value="{{ request.args.get('guardia','') }}"></div>{% endif %}
+<div class="col-md-2 d-flex align-items-end gap-1"><button class="btn btn-secondary">Filtrar</button><a class="btn btn-outline-secondary" href="{{ url_for('bitacora.index') }}">Limpiar</a></div>
+</form>
+<div class="table-responsive"><table class="table table-striped table-bordered"><thead><tr><th>Fecha</th><th>Guardia</th><th>Puesto / Turno</th><th>Realizadas</th><th>Pendientes</th><th>No realizadas / No aplica</th><th>Observaciones</th><th>Estado</th><th>Ver</th></tr></thead><tbody>
+{% for s in pagina.items %}{% set r=resumen(s) %}<tr><td>{{ s.fecha.strftime('%d/%m/%Y') }}</td><td>{{ s.guardia }}</td><td>{{ s.puesto }} / {{ s.turno }}</td><td>{{ r['Realizada'] }} / {{ s.tareas|length }}</td><td>{{ r['Pendiente'] }}</td><td>{{ r['No realizada'] }} / {{ r['No aplica'] }}</td><td>{{ s.anotaciones|length }} anotaciones{% if s.nota_cierre %}<br>{{ s.nota_cierre }}{% endif %}{% if r['No realizada'] or r['No aplica'] %}<br>Ver explicaciones en detalle{% endif %}</td><td>{{ 'Cerrada' if s.cierre else 'Abierta' }}</td><td><a href="{{ url_for('bitacora.detalle',ident=s.id) }}">Abrir</a></td></tr>
+{% else %}<tr><td colspan="9">No hay servicios con estos filtros.</td></tr>{% endfor %}</tbody></table></div>
+{% if pagina.has_prev %}<a class="btn btn-outline-secondary" href="{{ url_for('bitacora.index',page=pagina.prev_num,fecha=request.args.get('fecha',''),puesto=request.args.get('puesto',''),turno=request.args.get('turno',''),guardia=request.args.get('guardia','')) }}">Anterior</a>{% endif %}
+{% if pagina.has_next %}<a class="btn btn-outline-secondary" href="{{ url_for('bitacora.index',page=pagina.next_num,fecha=request.args.get('fecha',''),puesto=request.args.get('puesto',''),turno=request.args.get('turno',''),guardia=request.args.get('guardia','')) }}">Siguiente</a>{% endif %}
+<details class="mt-4"><summary>Registros anteriores de Actividades ({{ historico|length }})</summary>
+<div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Fecha</th><th>Guardia</th><th>Actividad</th><th>Descripción</th></tr></thead><tbody>{% for a in historico %}<tr><td>{{ a.fecha }}</td><td>{{ a.guardia }}</td><td>{{ a.tipo }}</td><td style="white-space:pre-wrap">{{ a.descripcion }}</td></tr>{% endfor %}</tbody></table></div></details>
+<a class="btn btn-secondary mt-3" href="{{ url_for('dashboard') }}">Dashboard</a>
+<script>
+const fechaServicio=document.getElementById('fecha-servicio');
+const turnoServicio=document.getElementById('turno-servicio');
+function proponerCulto(){const dia=new Date(fechaServicio.value+'T12:00:00').getDay();const noche=turnoServicio.value==='Noche';document.getElementById('culto-servicio').checked=!noche && [3,4].includes(dia);document.getElementById('culto-servicio').disabled=noche;}
+fechaServicio.addEventListener('change',proponerCulto);turnoServicio.addEventListener('change',proponerCulto);proponerCulto();
+</script>
+{% endblock %}

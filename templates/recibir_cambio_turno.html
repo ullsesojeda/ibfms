@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<h3>Recibir Cambio de Turno</h3>
+<p><strong>Fecha:</strong> {{ registro.fecha }} · <strong>Guardia:</strong> {{ registro.guardia }}</p>
+<p><strong>Turno:</strong> {{ registro.turno }} · <strong>Asunto:</strong> {{ registro.asunto }}</p>
+<div class="mb-3" style="white-space: pre-wrap;">{{ registro.descripcion }}</div>
+<form method="POST">
+    <label for="observaciones_recepcion" class="form-label">¿Hay observaciones al recibir el turno?</label>
+    <textarea id="observaciones_recepcion" name="observaciones_recepcion" class="form-control mb-2" rows="4" aria-describedby="ayuda-observaciones"></textarea>
+    <p id="ayuda-observaciones">Opcional. Si no hay observaciones, deja el campo vacío. Se guardan por separado de la entrega.</p>
+    <button type="submit" class="btn btn-success">Confirmar recibido</button>
+    <a href="{{ url_for('bitacora_turno') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

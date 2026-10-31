@@ -3,6 +3,7 @@
 {% block contenido %}
 
 <h2>Registro de Incidentes</h2>
+<p>Después de guardar, pulsa Avisar por WhatsApp, elige al destinatario y envía el mensaje. Abrir WhatsApp no confirma el envío.</p>
 
 <div class="card shadow mb-4">
 <div class="card-body">
@@ -68,10 +69,12 @@ Guardar incidente
 
 <tr>
 
-    <th>Fecha</th>
+    <th>ID</th>
+<th>Fecha</th>
     <th>Tipo</th>
     <th>Descripción</th>
     <th>Guardia</th>
+    <th>Aviso</th>
 
 </tr>
 
@@ -83,10 +86,12 @@ Guardar incidente
 
 <tr>
 
-    <td>{{ i.fecha }}</td>
+    <td>{{ i.id }}</td>
+<td>{{ i.fecha }}</td>
     <td>{{ i.tipo }}</td>
     <td>{{ i.descripcion }}</td>
     <td>{{ i.guardia }}</td>
+    <td><a class="btn btn-success btn-sm" target="_blank" rel="noopener noreferrer" href="{{ avisos_whatsapp[i.id] }}">Avisar por WhatsApp</a></td>
 
 </tr>
 

@@ -3,7 +3,7 @@
 {% block contenido %}
 
 <h2 class="mb-4">
-    🚛 Control de Vehículos
+    🚛 Control de vehículos de la IBFMS
 </h2>
 
 <div class="card shadow mb-4">
@@ -50,6 +50,11 @@ Chofer
 <option>otro</option>
 
 </select>
+<div class="mt-2" id="grupo_otro_chofer">
+    <label for="otro_chofer" class="form-label">Nombre del chofer (si eliges Otro)</label>
+    <input type="text" id="otro_chofer" name="otro_chofer" class="form-control" maxlength="100">
+</div>
+
 
 </div>
 
@@ -82,6 +87,11 @@ Vehículo
 <option>Basura</option>
 <option>Otro</option>
 </select>
+<div class="mt-2" id="grupo_otro_vehiculo">
+    <label for="otro_vehiculo" class="form-label">Marca o identificación del vehículo (si eliges Otro)</label>
+    <input type="text" id="otro_vehiculo" name="otro_vehiculo" class="form-control" maxlength="100">
+</div>
+
 
 </div>
 
@@ -294,6 +304,7 @@ Regresar al Dashboard
 
 <tr>
 
+<th>ID</th>
 <th>Fecha</th>
 <th>Hora</th>
 <th>Chofer</th>
@@ -301,6 +312,7 @@ Regresar al Dashboard
 <th>Movimiento</th>
 <th>Puesto</th>
 <th>Guardia</th>
+<th>Nota</th>
 
 </tr>
 
@@ -312,6 +324,7 @@ Regresar al Dashboard
 
 <tr>
 
+<td>{{ m.id }}</td>
 <td>{{ m.fecha }}</td>
 <td>{{ m.hora }}</td>
 <td>{{ m.chofer }}</td>
@@ -337,6 +350,7 @@ Salida
 
 <td>{{ m.puesto }}</td>
 <td>{{ m.guardia }}</td>
+<td style="white-space: pre-wrap;">{% if m.salida_sin_entrada %}<strong class="text-danger">Salida sin entrada registrada</strong><br>{% endif %}{{ m.nota or '—' }}</td>
 
 </tr>
 
@@ -348,4 +362,20 @@ Salida
 
 </div>
 
+<script>
+// Los campos siguen disponibles si JavaScript está desactivado.
+['chofer', 'vehiculo'].forEach(function (campo) {
+    const selector = document.querySelector('select[name="' + campo + '"]');
+    const grupo = document.getElementById('grupo_otro_' + campo);
+    const entrada = document.getElementById('otro_' + campo);
+    function actualizar() {
+        const otro = selector.value.trim().toLowerCase() === 'otro';
+        grupo.hidden = !otro;
+        entrada.disabled = !otro;
+        entrada.required = otro;
+    }
+    selector.addEventListener('change', actualizar);
+    actualizar();
+});
+</script>
 {% endblock %}

@@ -11,6 +11,7 @@ from flask import (
 )
 
 from io import BytesIO
+from urllib.parse import urlencode
 
 from openpyxl import Workbook
 
@@ -27,6 +28,7 @@ from werkzeug.security import (
     check_password_hash
 )
 
+from sqlalchemy import inspect, text
 from config import Config
 from models import (
     db,
@@ -42,12 +44,17 @@ from models import (
     AccesoAuditorio
 )
 
+from bitacora import bp as bitacora_bp
+from bitacora_models import ServicioBitacora, TareaBitacora, AnotacionBitacora
+from actualizacion_segura import respaldar_antes_de_actualizar
+
 from datetime import datetime
 import pandas as pd
 from flask import send_file
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.register_blueprint(bitacora_bp)
 
 if os.name == "nt":
 
@@ -76,7 +83,24 @@ def load_user(user_id):
 
 
 with app.app_context():
+    respaldo_previo = respaldar_antes_de_actualizar(db.engine, permitir_base_nueva=os.name == 'nt')
+    if respaldo_previo:
+        app.logger.warning('Respaldo previo a actualización verificado: %s', respaldo_previo)
     db.create_all()
+    # create_all no añade columnas a bases de datos existentes.
+    columnas = {c["name"] for c in inspect(db.engine).get_columns("bitacora_turno")}
+    if "observaciones_recepcion" not in columnas:
+        with db.engine.begin() as conexion:
+            conexion.execute(text(
+                "ALTER TABLE bitacora_turno ADD COLUMN observaciones_recepcion TEXT"
+            ))
+
+    tabla_vehiculos = ControlVehiculo.__tablename__
+    columnas_vehiculos = {c["name"] for c in inspect(db.engine).get_columns(tabla_vehiculos)}
+    with db.engine.begin() as conexion:
+        for nombre, tipo in (("nota", "TEXT"), ("salida_sin_entrada", "BOOLEAN DEFAULT FALSE")):
+            if nombre not in columnas_vehiculos:
+                conexion.execute(text(f"ALTER TABLE {tabla_vehiculos} ADD COLUMN {nombre} {tipo}"))
 
     admin = Usuario.query.filter_by(
         usuario="admin"
@@ -247,7 +271,7 @@ def bitacora_turno():
         db.session.commit()
 
         flash(
-            "Bitácora guardada.",
+            "Cambio de Turno guardado.",
             "success"
         )
 
@@ -654,6 +678,10 @@ def login():
     return render_template("login.html")
 
 
+def clave_vehiculo(nombre):
+    return " ".join((nombre or "").split()).casefold()
+
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -668,25 +696,49 @@ def dashboard():
         salida=None
     ).count()
 
-    empleados_dentro = Empleado.query.filter_by(
-        salida=None
+    # Un vehículo se cuenta una vez según su último movimiento registrado.
+    ultimos_vehiculos = {}
+    for movimiento in ControlVehiculo.query.order_by(ControlVehiculo.id.desc()).all():
+        clave = clave_vehiculo(movimiento.vehiculo)
+        if clave and clave != "otro":
+            ultimos_vehiculos.setdefault(clave, movimiento.movimiento)
+    vehiculos_dentro = sum(m == "Entrada" for m in ultimos_vehiculos.values())
+    vehiculos_hoy = ControlVehiculo.query.filter(
+        ControlVehiculo.fecha.like(hoy + "%")
     ).count()
 
-    vip_hoy = RegistroVIP.query.filter_by(
-        fecha=hoy
+    entradas_vehiculos_hoy = ControlVehiculo.query.filter(
+        ControlVehiculo.fecha.like(hoy + "%"), ControlVehiculo.movimiento == "Entrada"
+    ).count()
+    salidas_vehiculos_hoy = ControlVehiculo.query.filter(
+        ControlVehiculo.fecha.like(hoy + "%"), ControlVehiculo.movimiento == "Salida"
+    ).count()
+
+    vip_hoy = RegistroVIP.query.filter(
+        RegistroVIP.fecha.like(hoy + "%")
     ).count()
 
     incidentes = Incidente.query.count()
 
-    incidentes_hoy = Incidente.query.filter_by(
-        fecha=hoy
+    incidentes_hoy = Incidente.query.filter(
+        Incidente.fecha.like(hoy + "%")
     ).count()
 
-    actividades_hoy = Actividad.query.filter_by(
-        fecha=hoy
+    actividades_hoy = Actividad.query.filter(
+        Actividad.fecha.like(hoy + "%")
     ).count()
 
-    usuarios = Usuario.query.count()
+
+    from bitacora import ahora as ahora_bitacora
+    fecha_bitacora = ahora_bitacora().date()
+    inicio_bitacora = datetime.combine(fecha_bitacora, datetime.min.time())
+    from datetime import timedelta
+    fin_bitacora = inicio_bitacora + timedelta(days=1)
+    actividades_hoy += TareaBitacora.query.filter(
+        TareaBitacora.captura >= inicio_bitacora, TareaBitacora.captura < fin_bitacora
+    ).count() + AnotacionBitacora.query.filter(
+        AnotacionBitacora.fecha >= inicio_bitacora, AnotacionBitacora.fecha < fin_bitacora
+    ).count()
 
     return render_template(
 
@@ -696,7 +748,7 @@ def dashboard():
 
         visitantes_dentro=visitantes_dentro,
 
-        empleados_dentro=empleados_dentro,
+        vehiculos_dentro=vehiculos_dentro,
 
         vip_hoy=vip_hoy,
 
@@ -706,7 +758,9 @@ def dashboard():
 
         actividades_hoy=actividades_hoy,
 
-        usuarios=usuarios
+        vehiculos_hoy=vehiculos_hoy,
+        entradas_vehiculos_hoy=entradas_vehiculos_hoy,
+        salidas_vehiculos_hoy=salidas_vehiculos_hoy
 
     )
 
@@ -1100,7 +1154,10 @@ def incidentes():
 
     return render_template(
         "incidentes.html",
-        incidentes=datos
+        incidentes=datos,
+        avisos_whatsapp={i.id: "https://wa.me/?" + urlencode({"text":
+            f"IBFMS — Aviso de incidencia #{i.id}\nFecha: {i.fecha}\nTipo: {i.tipo}\nDescripción: {i.descripcion}\nGuardia: {i.guardia}"
+        }) for i in datos}
     )
 
     return render_template(
@@ -1108,57 +1165,10 @@ def incidentes():
     incidentes=datos
 )
 
-@app.route(
-        "/actividades",
-        methods=["GET", "POST"]
-    )
+@app.route("/actividades")
 @login_required
-   
 def actividades():
-
-        if request.method == "POST":
-
-            nueva = Actividad(
-                fecha=datetime.now().strftime(
-                    "%d/%m/%Y %H:%M:%S"
-                ),
-                tipo=request.form["tipo"],
-                descripcion=request.form["descripcion"],
-                guardia=current_user.usuario
-            )
-
-            db.session.add(nueva)
-            db.session.commit()
-
-            flash(
-                "Actividad registrada.",
-                "success"
-            )
-
-            return redirect(
-                url_for("actividades")
-            )
-
-        if current_user.rol == "admin":
-            datos = (
-                Actividad.query
-                .order_by(Actividad.id.desc())
-                .all()
-            )
-        else:
-            datos = (
-                Actividad.query
-                .filter_by(
-                    guardia=current_user.usuario
-                )
-                .order_by(Actividad.id.desc())
-                .all()
-            )
-
-        return render_template(
-            "actividades.html",
-            actividades=datos
-        )
+    return redirect(url_for("bitacora.index"))
 
 @app.route(
     "/empleados",
@@ -2095,13 +2105,38 @@ def control_vehiculos():
         fecha = datetime.now().strftime("%d/%m/%Y")
         hora = datetime.now().strftime("%H:%M:%S")
 
+        valores = {}
+        for campo in ("chofer", "vehiculo"):
+            valor = request.form.get(campo, "").strip()
+            if valor.casefold() == "otro":
+                valor = request.form.get("otro_" + campo, "").strip()
+            if not valor or valor.casefold() == "otro" or len(valor) > 100:
+                flash("Indica el chofer y el vehículo (máximo 100 caracteres). Si eliges Otro, escribe el dato correspondiente.", "warning")
+                return redirect(url_for("control_vehiculos"))
+            valores[campo] = valor
+
+        movimiento = request.form.get("movimiento", "")
+        puesto = request.form.get("puesto", "")
+        if movimiento not in ("Entrada", "Salida") or puesto not in ("PUESTO 1", "PUESTO 2", "PUESTO 3"):
+            flash("Selecciona un movimiento y un puesto válidos.", "warning")
+            return redirect(url_for("control_vehiculos"))
+        ultimo = next((m for m in ControlVehiculo.query.order_by(ControlVehiculo.id.desc()).all()
+                       if clave_vehiculo(m.vehiculo) == clave_vehiculo(valores["vehiculo"])), None)
+        sin_entrada = movimiento == "Salida" and (ultimo is None or ultimo.movimiento != "Entrada")
+        nota = request.form.get("nota", "").strip()
+        if sin_entrada and not nota:
+            return render_template("confirmar_salida_vehiculo.html", valores=valores,
+                                   movimiento=movimiento, puesto=puesto), 400
+
         nuevo = ControlVehiculo(
             fecha=fecha,
             hora=hora,
-            chofer=request.form["chofer"],
-            vehiculo=request.form["vehiculo"],
-            movimiento=request.form["movimiento"],
-            puesto=request.form["puesto"],
+            chofer=valores["chofer"],
+            vehiculo=valores["vehiculo"],
+            movimiento=movimiento,
+            nota=nota or None,
+            salida_sin_entrada=sin_entrada,
+            puesto=puesto,
             guardia=current_user.usuario
         )
 
@@ -2185,7 +2220,9 @@ def control_vehiculos():
             "Vehículo",
             "Movimiento",
             "Puesto",
-            "Guardia"
+            "Guardia",
+            "Nota",
+            "Salida sin entrada registrada"
         ])
 
         for m in movimientos:
@@ -2196,7 +2233,9 @@ def control_vehiculos():
                 m.vehiculo,
                 m.movimiento,
                 m.puesto,
-                m.guardia
+                m.guardia,
+                m.nota or "",
+                "Sí" if m.salida_sin_entrada else "No"
             ])
 
         hoja.freeze_panes = "A2"
@@ -2263,7 +2302,7 @@ def historial_vip():
         registros=datos
     )
 @app.route(
-    "/recibir_bitacora/<int:id>"
+    "/recibir_bitacora/<int:id>", methods=["GET", "POST"]
 )
 @login_required
 def recibir_bitacora(id):
@@ -2273,7 +2312,13 @@ def recibir_bitacora(id):
         .get_or_404(id)
     )
 
-    if not registro.recibido:
+    if request.method == "GET" and not registro.recibido:
+        return render_template("recibir_cambio_turno.html", registro=registro)
+
+    if request.method == "POST" and not registro.recibido:
+        registro.observaciones_recepcion = (
+            request.form.get("observaciones_recepcion", "").strip() or None
+        )
         registro.recibido = True
         registro.recibido_por = (
             current_user.usuario
@@ -2282,7 +2327,7 @@ def recibir_bitacora(id):
         db.session.commit()
 
         flash(
-            "Bitácora recibida.",
+            "Cambio de Turno recibido.",
             "success"
         )
 

@@ -67,11 +67,11 @@
                 <div class="card-body">
 
                     <h6 class="text-muted">
-                        🚛 Empleados Dentro
+                        🚛 Vehículos dentro · pendientes de salir
                     </h6>
 
                     <h1 class="display-5 text-primary">
-                        {{ empleados_dentro }}
+                        {{ vehiculos_dentro }}
                     </h1>
 
                 </div>
@@ -133,7 +133,7 @@
                 <div class="card-body">
 
                     <h6 class="text-muted">
-                        📋 Actividades Hoy
+                        📋 Registros de Bitácora Hoy
                     </h6>
 
                     <h1 class="display-5 text-info">
@@ -159,12 +159,13 @@
                 <div class="card-body">
 
                     <h6 class="text-muted">
-                        👤 Usuarios
+                        🚛 Movimientos de Vehículos Hoy
                     </h6>
 
                     <h1 class="display-5">
-                        {{ usuarios }}
+                        {{ vehiculos_hoy }}
                     </h1>
+                    <p>Entradas: <strong>{{ entradas_vehiculos_hoy }}</strong> · Salidas: <strong>{{ salidas_vehiculos_hoy }}</strong></p>
 
                 </div>
 
@@ -231,7 +232,7 @@
     href="{{ url_for('control_vehiculos') }}"
     class="btn btn-primary w-100 mb-2"
 >
-    🚛 Control de Vehículos
+    🚛 Control de vehículos de la IBFMS
 </a>
         </div>
 
@@ -299,13 +300,13 @@
 
         <div class="col-md-3 d-grid">
             <a href="{{ url_for('bitacora_turno') }}" class="btn btn-secondary">
-                📒 Bitácora
+                📒 Cambio de Turno
             </a>
         </div>
 
         <div class="col-md-3 d-grid">
-            <a href="{{ url_for('actividades') }}" class="btn btn-info">
-                📋 Actividades
+            <a href="{{ url_for('bitacora.index') }}" class="btn btn-info">
+                📋 Bitácora
             </a>
         </div>
 

@@ -48,7 +48,7 @@
         <h3>🛡️ IBFMS</h3>
 
         <small>
-            Bitácora de Vigilancia
+            Cambio de Turno
         </small>
 
     </div>
@@ -70,7 +70,7 @@
     <a href="{{ url_for('control_vehiculos') }}"
        class="{% if request.endpoint=='empleados' %}active{% endif %}">
         <i class="bi bi-truck"></i>
-        Control de Vehiculos
+        Control de vehículos de la IBFMS
     </a>
 
     <a href="{{ url_for('registro_vip') }}"
@@ -82,7 +82,7 @@
     <a href="{{ url_for('bitacora_turno') }}"
        class="{% if request.endpoint=='bitacora_turno' %}active{% endif %}">
         <i class="bi bi-journal-text"></i>
-        Bitácora
+        Cambio de Turno
     </a>
 
     <a href="{{ url_for('incidentes') }}"
@@ -91,10 +91,10 @@
         Incidentes
     </a>
 
-    <a href="{{ url_for('actividades') }}"
-       class="{% if request.endpoint=='actividades' %}active{% endif %}">
+    <a href="{{ url_for('bitacora.index') }}"
+       class="{% if request.blueprint=='bitacora' %}active{% endif %}">
         <i class="bi bi-list-check"></i>
-        Actividades
+        Bitácora
     </a>
 
     <a href="{{ url_for('objetos_custodia') }}">
