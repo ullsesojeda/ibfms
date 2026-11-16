@@ -1,12 +1,23 @@
 {% extends 'base.html' %}
 {% block contenido %}
-<h2>Bitácora · {{ servicio.puesto }} · {{ servicio.turno }}</h2>
+<h2>Actividades · {{ servicio.puesto }} · {{ servicio.turno }}</h2>
 <p><strong>Fecha de inicio:</strong> {{ servicio.fecha.strftime('%d/%m/%Y') }} · <strong>Guardia:</strong> {{ servicio.guardia }} · <strong>Estado:</strong> {{ 'Cerrada' if servicio.cierre else 'Abierta' }}</p>
 <p class="text-muted">Horas de operación: Ciudad de México. La hora de captura se guarda al pulsar Guardar; no acredita por sí sola la hora de ejecución. Las tareas de jornada se confirman al cierre.</p>
 <div class="alert alert-info">{% for estado,n in resumen.items() %}<span class="me-3">{{ estado }}: <strong>{{ n }}</strong></span>{% endfor %}</div>
 {% if servicio.motivo_culto %}<p><strong>Ajuste de culto:</strong> {{ servicio.motivo_culto }}</p>{% endif %}
 {% if servicio.cierre %}<p><strong>Cierre:</strong> {{ servicio.cierre.strftime('%d/%m/%Y %H:%M:%S') }}</p><p style="white-space:pre-wrap">{{ servicio.nota_cierre or 'Sin observaciones de cierre.' }}</p>{% endif %}
 <div class="d-flex flex-wrap gap-2 mb-3"><a class="btn btn-secondary" href="{{ url_for('bitacora.index') }}">Volver</a><a class="btn btn-outline-primary" href="{{ url_for('bitacora_turno') }}" target="_blank" rel="noopener">Cambio de Turno</a><a class="btn btn-outline-danger" href="{{ url_for('incidentes') }}" target="_blank" rel="noopener">Registrar incidencia</a><a class="btn btn-outline-secondary" href="{{ url_for('control_vehiculos') }}" target="_blank" rel="noopener">Vehículos</a>{% if editable %}<a class="btn btn-dark" href="{{ url_for('bitacora.cerrar',ident=servicio.id) }}">Revisar y cerrar servicio</a>{% endif %}</div>
+{% if medio_turno %}<p><strong>Modalidad:</strong> Medio turno de día con relevo</p>{% endif %}
+{% if relevos %}
+<details class="card card-body mb-3"><summary>Entregar el servicio al relevo</summary>
+<p>El vigilante seleccionado podrá continuar con esta misma lista desde su cuenta. Las tareas y anotaciones ya guardadas se conservan.</p>
+<form method="POST" action="{{ url_for('bitacora.relevo', ident=servicio.id) }}">
+<input type="hidden" name="csrf_token" value="{{ bitacora_token() }}">
+<label for="guardia-relevo">Vigilante de relevo</label>
+<select id="guardia-relevo" class="form-select mb-2" name="guardia" required>
+<option value="">Selecciona un vigilante</option>{% for g in relevos %}<option>{{ g.usuario }}</option>{% endfor %}
+</select><button class="btn btn-primary">Entregar al relevo</button></form></details>
+{% endif %}
 {% for t in servicio.tareas %}
 <article id="tarea-{{ t.id }}" class="card mb-3"><div class="card-body">
 <div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ loop.index }}. {{ t.horario }} · {{ t.seccion }}</strong><span class="badge {{ 'bg-success' if t.estado=='Realizada' else 'bg-danger' if t.estado=='No realizada' else 'bg-secondary' if t.estado=='No aplica' else 'bg-warning text-dark' }}">{{ t.estado }}</span></div>

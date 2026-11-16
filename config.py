@@ -11,6 +11,7 @@ class Config:
 
     if os.name == "nt":
         # Windows (desarrollo)
+        os.makedirs(os.path.join(BASE_DIR, "instance"), exist_ok=True)
         SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(
             BASE_DIR,
             "instance",

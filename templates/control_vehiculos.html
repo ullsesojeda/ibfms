@@ -28,26 +28,33 @@ Chofer
 
 <option value="">Seleccione...</option>
 
-<option>Jonathan V bodegas</option>
-<option>Salvador Soria Cafe</option>
-<option>Hno Toño Rodriguez</option>
-<option>CP Arturo Cruz</option>
-<option>Eliut Manrique</option>
-<option>Marco Jauregui</option>
-<option>Marco Jauregui Jr</option>
-<option>Israel Tafoya</option>
-<option>Agel Carmona</option>
-<option>Fernando Secua</option>
-<option>Elias Panti</option>
-<option>Jordan Mendoza</option>
-<option>Jonathan Perez</option>
-<option>Francisco Ramos</option>
-<option>Pastor Avila Jr</option>
-<option>Pastor Lupe Aranda</option>
-<option>Josue Aranda</option>
-<option>Empleado Honorio</option>
-<option>Contador</option>
-<option>otro</option>
+<option>JONATHAN V BODEGAS</option>
+<option>SALVADOR SORIA CAFE</option>
+<option>HNO TOÑO RODRIGUEZ</option>
+<option>CP ARTURO CRUZ</option>
+<option>ELIUT MANRIQUE</option>
+<option>MARCO JAUREGUI</option>
+<option>MARCO JAUREGUI JR</option>
+<option>ISRAEL TAFOYA</option>
+<option>AGEL CARMONA</option>
+<option>FERNANDO SECUA</option>
+<option>ELIAS PANTI</option>
+<option>JORDAN MENDOZA</option>
+<option>JONATHAN PEREZ</option>
+<option>FRANCISCO RAMOS</option>
+<option>PASTOR AVILA JR</option>
+<option>PASTOR LUPE ARANDA</option>
+<option>JOSUE ARANDA</option>
+<option>EMPLEADO HONORIO</option>
+<option>CONTADOR</option>
+<option>CITLALI CRUZ</option>
+<option>ISIDRO GARCIA</option>
+<option>HONORIO FLORES</option>
+<option>OSCAR ARGENTIS</option>
+<option>DANIEL FLORES</option>
+<option>JOEL GASCA</option>
+<option>AUGUSTO OJEDA</option>
+<option>OTRO</option>
 
 </select>
 <div class="mt-2" id="grupo_otro_chofer">
@@ -72,20 +79,28 @@ Vehículo
 
 <option value="">Seleccione...</option>
 
-<option>Expedition</option>
-<option>Transport</option>
-<option>Sanavi</option>
-<option>Mercedes Amarillo</option>
-<option>Super Duty</option>
-<option>Star Craft</option>
-<option>Aveo</option>
-<option>Yukon</option>
-<option>Pick Up</option>
-<option>Camio Amarillo</option>
-<option>Camion Agua</option>
-<option>Camion GAS</option>
-<option>Basura</option>
-<option>Otro</option>
+<option>EXPEDITION</option>
+<option>TRANSPORT</option>
+<option>SANAVI</option>
+<option>MERCEDES AMARILLO</option>
+<option>SUPER DUTY</option>
+<option>STAR CRAFT</option>
+<option>AVEO</option>
+<option>YUKON</option>
+<option>PICK UP</option>
+<option>CAMIO AMARILLO</option>
+<option>CAMION AGUA</option>
+<option>CAMION GAS</option>
+<option>BASURA</option>
+<option>MAZDA BLANCO</option>
+<option>SONOMA BLANCA</option>
+<option>MOTO JOEL</option>
+<option>DURANGO GRIS</option>
+<option>AVANZA GRIS</option>
+<option>URBAN EMAUS</option>
+<option>ERTIGA GRIS</option>
+<option>KIA GRIS</option>
+<option>OTRO</option>
 </select>
 <div class="mt-2" id="grupo_otro_vehiculo">
     <label for="otro_vehiculo" class="form-label">Marca o identificación del vehículo (si eliges Otro)</label>
@@ -327,8 +342,8 @@ Regresar al Dashboard
 <td>{{ m.id }}</td>
 <td>{{ m.fecha }}</td>
 <td>{{ m.hora }}</td>
-<td>{{ m.chofer }}</td>
-<td>{{ m.vehiculo }}</td>
+<td>{{ (m.chofer or '')|upper }}</td>
+<td>{{ (m.vehiculo or '')|upper }}</td>
 
 <td>
 

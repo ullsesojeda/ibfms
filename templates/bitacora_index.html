@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block contenido %}
-<h2>Bitácora</h2>
+<h2>Actividades</h2>
 <p class="text-muted">Lista de servicio por puesto y turno, anotaciones y revisión de pendientes.</p>
 <div class="card mb-4"><div class="card-body">
 <h4>Iniciar servicio</h4>
@@ -8,12 +8,12 @@
 <input type="hidden" name="csrf_token" value="{{ bitacora_token() }}">
 <div class="col-md-3"><label for="fecha-servicio">Fecha de inicio del turno</label><input id="fecha-servicio" class="form-control" type="date" name="fecha" value="{{ fecha_default }}" required></div>
 <div class="col-md-3"><label for="puesto-servicio">Puesto</label><select id="puesto-servicio" class="form-select" name="puesto" required><option value="">Selecciona…</option>{% for n in [1,2,3] %}<option>PUESTO {{ n }}</option>{% endfor %}</select></div>
-<div class="col-md-3"><label for="turno-servicio">Turno</label><select id="turno-servicio" name="turno" class="form-select">{% for t in ['Día','Noche'] %}<option {% if turno_default==t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+<div class="col-md-3"><label for="turno-servicio">Turno</label><select id="turno-servicio" name="turno" class="form-select">{% for t in ['Día','Medio Día','Noche'] %}<option {% if turno_default==t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
 <div class="col-md-3"><label>Guardia</label><p class="form-control">{{ current_user.usuario }}</p></div>
-<div class="col-12"><label><input id="culto-servicio" type="checkbox" name="culto" value="1" {% if fecha_default.weekday() in [2,3] and turno_default=='Día' %}checked{% endif %}> Incluir actividades de culto (solo turno de día)</label>
-<p class="text-muted mb-1">Se proponen miércoles y jueves. Explica cualquier cambio para un día con o sin culto.</p>
+<div class="col-12"><label><input id="culto-servicio" type="checkbox" name="culto" value="1" {% if fecha_default.weekday() in [2,3,6] and turno_default=='Día' %}checked{% endif %}> Incluir actividades de culto (solo turno de día)</label>
+<p class="text-muted mb-1">Se proponen miércoles, jueves y domingo. Explica cualquier cambio para un día con o sin culto.</p>
 <input aria-label="Motivo del cambio de culto" class="form-control" name="motivo_culto" placeholder="Motivo del ajuste de culto, si corresponde"></div>
-<div><button class="btn btn-primary">Iniciar bitácora</button></div>
+<div><button class="btn btn-primary">Iniciar actividades</button></div>
 </form>
 </div></div>
 <h4>{{ 'Supervisión de servicios' if current_user.rol=='admin' else 'Mis servicios' }}</h4>
@@ -35,7 +35,7 @@
 <script>
 const fechaServicio=document.getElementById('fecha-servicio');
 const turnoServicio=document.getElementById('turno-servicio');
-function proponerCulto(){const dia=new Date(fechaServicio.value+'T12:00:00').getDay();const noche=turnoServicio.value==='Noche';document.getElementById('culto-servicio').checked=!noche && [3,4].includes(dia);document.getElementById('culto-servicio').disabled=noche;}
+function proponerCulto(){const dia=new Date(fechaServicio.value+'T12:00:00').getDay();const noche=turnoServicio.value==='Noche';document.getElementById('culto-servicio').checked=!noche && [0,3,4].includes(dia);document.getElementById('culto-servicio').disabled=noche;}
 fechaServicio.addEventListener('change',proponerCulto);turnoServicio.addEventListener('change',proponerCulto);proponerCulto();
 </script>
 {% endblock %}

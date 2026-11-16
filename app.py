@@ -2113,7 +2113,7 @@ def control_vehiculos():
             if not valor or valor.casefold() == "otro" or len(valor) > 100:
                 flash("Indica el chofer y el vehículo (máximo 100 caracteres). Si eliges Otro, escribe el dato correspondiente.", "warning")
                 return redirect(url_for("control_vehiculos"))
-            valores[campo] = valor
+            valores[campo] = valor.upper()
 
         movimiento = request.form.get("movimiento", "")
         puesto = request.form.get("puesto", "")
@@ -2229,8 +2229,8 @@ def control_vehiculos():
             hoja.append([
                 m.fecha,
                 m.hora,
-                m.chofer,
-                m.vehiculo,
+                (m.chofer or "").upper(),
+                (m.vehiculo or "").upper(),
                 m.movimiento,
                 m.puesto,
                 m.guardia,

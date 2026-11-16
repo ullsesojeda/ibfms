@@ -7,9 +7,10 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import StaleDataError
-from models import db, Actividad, BitacoraTurno, Incidente, ControlVehiculo
+from models import db, Actividad, BitacoraTurno, Incidente, ControlVehiculo, Usuario
 from bitacora_models import ServicioBitacora, TareaBitacora, AnotacionBitacora, EventoBitacora
 from bitacora_catalogo import CATALOGO
+from actividades_domingo import DOMINGO
 
 bp = Blueprint('bitacora', __name__, url_prefix='/bitacora')
 ESTADOS = ('Pendiente', 'Realizada', 'No realizada', 'No aplica')
@@ -56,11 +57,17 @@ def obtener(ident, editar=False):
     if editar:
         consulta = consulta.with_for_update()
     servicio = consulta.get_or_404(ident)
-    if servicio.guardia != current_user.usuario and (editar or current_user.rol != 'admin'):
+    if servicio.guardia != current_user.usuario and (editar or (
+        current_user.rol != 'admin' and not participacion_previa(servicio.id)
+    )):
         abort(403)
     if editar and servicio.cierre:
         abort(409, 'La bitácora ya está cerrada.')
     return servicio
+
+
+def participacion_previa(servicio_id):
+    return EventoBitacora.query.filter_by(servicio_id=servicio_id, guardia=current_user.usuario).first() is not None
 
 
 def evento(servicio, detalle):
@@ -84,6 +91,9 @@ def index():
     fecha_default = hoy - timedelta(days=ahora().time() < time(7, 30))
     if request.method == 'POST':
         puesto, turno = request.form.get('puesto'), request.form.get('turno')
+        medio_turno = turno == 'Medio Día'
+        if medio_turno:
+            turno = 'Día'
         try:
             fecha = date.fromisoformat(request.form.get('fecha', ''))
         except ValueError:
@@ -94,12 +104,12 @@ def index():
             abort(400, 'Solo puedes iniciar servicios de hoy o ayer.')
         culto = request.form.get('culto') == '1'
         motivo = request.form.get('motivo_culto', '').strip()
-        if turno == 'Día' and culto != (fecha.weekday() in (2, 3)) and not motivo:
+        if turno == 'Día' and culto != (fecha.weekday() in (2, 3, 6)) and not motivo:
             flash('Explica el cambio de actividades de culto para esa fecha.', 'warning')
             return redirect(url_for('.index'))
         existente = ServicioBitacora.query.filter_by(fecha=fecha, puesto=puesto, turno=turno).first()
         if existente:
-            if existente.guardia == current_user.usuario or current_user.rol == 'admin':
+            if existente.guardia == current_user.usuario or current_user.rol == 'admin' or participacion_previa(existente.id):
                 flash('Ya existe una bitácora para ese puesto, turno y fecha.', 'info')
                 return redirect(url_for('.detalle', ident=existente.id))
             flash('Ese servicio ya tiene una bitácora asignada a otro guardia.', 'warning')
@@ -109,14 +119,18 @@ def index():
         db.session.add(servicio)
         try:
             db.session.flush()
-            for orden, fila in enumerate(CATALOGO[puesto, turno]):
+            filas = CATALOGO[puesto, turno]
+            if turno == 'Día' and fecha.weekday() == 6 and puesto in DOMINGO:
+                filas = [fila for fila in filas if fila[2] != 'Culto'] + DOMINGO[puesto]
+            for orden, fila in enumerate(filas):
                 horario, actividad, seccion, *ref = fila
                 if seccion == 'Culto' and not servicio.culto:
                     continue
                 db.session.add(TareaBitacora(servicio_id=servicio.id, orden=orden, horario=horario,
                     actividad=actividad, seccion=seccion, referencia=ref[0] if ref else None,
                     limite=limite_tarea(fecha, turno, horario)))
-            evento(servicio, 'Servicio iniciado' + (f'. Ajuste de culto: {motivo}' if motivo else ''))
+            evento(servicio, ('Medio turno de día iniciado' if medio_turno else 'Servicio iniciado')
+                   + (f'. Ajuste de culto: {motivo}' if motivo else ''))
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
@@ -126,7 +140,10 @@ def index():
     consulta = ServicioBitacora.query
     historico = Actividad.query
     if current_user.rol != 'admin':
-        consulta = consulta.filter_by(guardia=current_user.usuario)
+        consulta = consulta.filter(db.or_(
+            ServicioBitacora.guardia == current_user.usuario,
+            ServicioBitacora.eventos.any(EventoBitacora.guardia == current_user.usuario),
+        ))
         historico = historico.filter_by(guardia=current_user.usuario)
     for campo in ('puesto', 'turno', 'guardia'):
         valor = request.args.get(campo, '').strip()
@@ -147,8 +164,28 @@ def index():
 @login_required
 def detalle(ident):
     servicio = obtener(ident)
+    editable = not servicio.cierre and servicio.guardia == current_user.usuario
+    medio_turno = servicio.turno == 'Día' and servicio.eventos and servicio.eventos[0].detalle.startswith('Medio turno de día iniciado')
+    relevos = (Usuario.query.filter(Usuario.usuario != current_user.usuario)
+               .order_by(Usuario.usuario).all()) if editable and medio_turno else []
     return render_template('bitacora_detalle.html', servicio=servicio, resumen=resumen(servicio), ahora=ahora(),
-                           editable=not servicio.cierre and servicio.guardia == current_user.usuario)
+                           editable=editable, medio_turno=medio_turno, relevos=relevos)
+
+
+@bp.post('/<int:ident>/relevo')
+@login_required
+def relevo(ident):
+    servicio = obtener(ident, editar=True)
+    if servicio.turno != 'Día' or not servicio.eventos or not servicio.eventos[0].detalle.startswith('Medio turno de día iniciado'):
+        abort(400, 'Este servicio no se inició como medio turno de día.')
+    nombre = request.form.get('guardia', '')
+    if nombre == current_user.usuario or not Usuario.query.filter_by(usuario=nombre).first():
+        abort(400, 'Selecciona otro vigilante registrado.')
+    evento(servicio, f'Servicio entregado a {nombre}.')
+    servicio.guardia = nombre
+    db.session.commit()
+    flash(f'{nombre} ya puede continuar las actividades desde su cuenta.', 'success')
+    return redirect(url_for('.detalle', ident=ident))
 
 
 @bp.route('/<int:ident>/tarea/<int:tarea_id>', methods=['POST'])

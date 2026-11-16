@@ -64,7 +64,7 @@
     <a href="{{ url_for('visitantes') }}"
        class="{% if request.endpoint=='visitantes' %}active{% endif %}">
         <i class="bi bi-people-fill"></i>
-        Visitantes
+        Visitantes (AUTOS y personas)
     </a>
 
     <a href="{{ url_for('control_vehiculos') }}"
@@ -94,7 +94,7 @@
     <a href="{{ url_for('bitacora.index') }}"
        class="{% if request.blueprint=='bitacora' %}active{% endif %}">
         <i class="bi bi-list-check"></i>
-        Bitácora
+        Actividades
     </a>
 
     <a href="{{ url_for('objetos_custodia') }}">

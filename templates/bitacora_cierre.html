@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block contenido %}
-<h2>Revisar y cerrar Bitácora</h2>
+<h2>Revisar y cerrar Actividades</h2>
 <p>{{ servicio.puesto }} · {{ servicio.turno }} · {{ servicio.fecha.strftime('%d/%m/%Y') }} · {{ servicio.guardia }}</p>
 <div class="alert alert-info">{% for estado,n in resumen.items() %}{{ estado }}: <strong>{{ n }}</strong> · {% endfor %}</div>
 {% if resumen['Pendiente'] %}<div class="alert alert-warning">Quedan actividades pendientes. Explica el motivo para poder cerrar. Las pendientes conservarán su estado.</div>{% endif %}
